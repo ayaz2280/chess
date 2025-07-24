@@ -1,0 +1,19 @@
+simulateMove('e1-g1'):
+  newGameState = clone(gameState);
+  entry = getMoves(e1).find(entry => entry.move === 'e1-g1');
+
+  getMoves('e1'):
+    pseudoLegalMoves = getKingMoves('e1');
+
+    getKingMoves('e1'):
+      pseudoLegalKingPositions = ['f1'];
+      moves = [
+        {type: 'move', move: 'e1-f1'}
+      ];
+      moves.push(getCastlingMoves('e1'));
+
+      getCastlingMoves('e1'):
+        rightRookInitPos = 'h1';
+        rightRookOnPlace = true;
+
+We need to add function 'isKingChecked'. This function will check if 'isKingAttacked' on the next opponents move. We need to rename function 'isKingCheckedAfterMove' to 'isKingAttackedAfterMove'

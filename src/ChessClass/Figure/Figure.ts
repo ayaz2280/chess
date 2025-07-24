@@ -1,0 +1,40 @@
+import type { FigureType } from "./FigureTypes";
+import type { ColorType } from "../Player/PlayerTypes";
+
+class Figure {
+  private color: ColorType;
+  private piece: FigureType;
+  static ID_COUNTER: number = 0;
+  //readonly id: number;
+
+  constructor(color: ColorType, piece: FigureType) {
+    this.color = color;
+    this.piece = piece;
+    //this.id = Figure.ID_COUNTER++;
+
+  }
+
+  getColor() {
+    return this.color;
+  }
+
+  getPiece() {
+    return this.piece;
+  }
+
+  setColor(color: ColorType) {
+    this.color = color;
+  }
+
+  setPiece(piece: FigureType) {
+    this.piece = piece;
+  }
+
+  static clone(piece: Figure): Figure {
+    return new Figure(piece.color, piece.piece);
+  }
+}
+
+export { Figure };
+
+
