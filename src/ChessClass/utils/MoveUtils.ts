@@ -1,5 +1,5 @@
-import { inRange } from "../HelperFunctions";
-import { Direction, Move, Position } from "./MoveTypes";
+import { inRange, positionInGrid } from "../HelperFunctions";
+import { Direction, Move, Position } from "../Moves/MoveTypes";
 
 /**
  * Returns move offset
@@ -45,4 +45,13 @@ function getPositionRelativeTo(pos: Position, dir: Direction, offset: Position):
   return resPosition;
 }
 
-export { getMoveOffset, getPositionRelativeTo };
+function getMove(start: Position, end: Position): Move {
+  if (!positionInGrid(start) || !positionInGrid(end)) throw new Error(`Any of the position are out of grid: ${start}, ${end}`);
+
+  return {
+    start: start,
+    end: end,
+  };
+}
+
+export { getMoveOffset, getPositionRelativeTo, getMove };

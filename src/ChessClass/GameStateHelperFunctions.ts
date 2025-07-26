@@ -8,7 +8,7 @@ import { CastlingMoveInfo, CastlingRights, GameState, HistoryEntry } from "./typ
 import { FigureType } from "./Figure/FigureTypes";
 import { Move, Position } from "./Moves/MoveTypes";
 import { ColorType } from "./Player/PlayerTypes";
-import { getMoveOffset, getPositionRelativeTo } from "./Moves/MoveUtils";
+import { getMoveOffset, getPositionRelativeTo } from "./utils/MoveUtils";
 
 const CHAR_TO_FIGURE_MAP: Record<string, FigureType> = {
   r: 'rook',

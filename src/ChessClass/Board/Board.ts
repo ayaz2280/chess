@@ -125,6 +125,10 @@ class Board {
     if (!positionInGrid(pos)) return null;
     return this.grid[pos.y][pos.x];
   }
+
+  isOccupied(pos: Position): boolean {
+    return this.grid[pos.y][pos.x] ? true : false;
+  }
 }
 
 export function getInitialBoard(): Board {

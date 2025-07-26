@@ -1,9 +1,11 @@
 import { assert } from "chai";
-import { Board } from "../src/ChessClass/Board";
-import { ChessEngine } from "../src/ChessClass/ChessEngine";
+import { Board } from "../src/ChessClass/Board/Board";
+import { ChessEngine } from "../src/ChessClass/ChessEngine/ChessEngine";
 import { posToAlgNotation, styled } from "../src/ChessClass/HelperFunctions";
-import { HumanPlayer, ComputerPlayer } from "../src/ChessClass/Player";
-import { ChessGrid, ColorType, GameState, HistoryEntry, Position } from "../src/ChessClass/types/ChessTypes";
+import { HumanPlayer, ComputerPlayer } from "../src/ChessClass/Player/Player";
+import { ColorType, GameState, HistoryEntry, Position } from "../src/ChessClass/types/ChessTypes";
+import { ChessGrid } from "../src/ChessClass/Board/BoardTypes";
+import { getEnPassantFile, requestCastlingRights } from "../src/ChessClass/GameStateHelperFunctions";
 
 const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorType = 'white'): GameState => {
   const board = new Board();
@@ -38,8 +40,8 @@ const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorTyp
     sideToMove: currentPlayerColor,
     fullMoveCounter: 1,
   };
-  gameState.castlingRights = ChessEngine['requestCastlingRights'](gameState);
-  gameState.enPassantTargetFile = ChessEngine['getEnPassantFile'](gameState);
+  gameState.castlingRights = requestCastlingRights(gameState);
+  gameState.enPassantTargetFile = getEnPassantFile(gameState);
 
   return gameState;
 };
