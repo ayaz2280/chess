@@ -1,9 +1,10 @@
 import { Board } from "../../../Board/Board";
-import { KING_OFFSETS } from "../../../constants";
+import { KING_OFFSETS } from '../FigureOffsets';
 import { Figure } from "../../../Figure/Figure";
-import { getFigure, isFirstMove } from "../../../GameStateHelperFunctions";
+
 import { HistoryEntry, GameState, CastlingMoveInfo, ActionType } from "../../../types/ChessTypes";
 import { areAllies, containsInitialFigure, getDirection } from "../../../utils/gameStateUtils";
+import { isFirstMove } from "../../../utils/LegalityCheckUtils";
 import { buildHistoryEntry } from "../../../utils/historyUtils";
 import { getPositionRelativeTo, getMove } from "../../../utils/MoveUtils";
 import { isKingChecked } from "../../LegalityChecks/KingChecks";
@@ -11,7 +12,8 @@ import { Position, Direction, Move } from "../../MoveTypes";
 
 function getKingMoves(gameState: GameState, pos: Position, types?: ActionType[]): HistoryEntry[] {
   const moves: HistoryEntry[] = [];
-  const piece: Figure | null = getFigure(gameState, pos);
+  const board: Board = gameState.board;
+  const piece: Figure | null = board.getPiece(pos);
 
   if (!piece) return moves;
 
@@ -22,7 +24,7 @@ function getKingMoves(gameState: GameState, pos: Position, types?: ActionType[])
 
         if (!resPos) return [];
 
-        const pieceOnSquare: Figure | null = getFigure(gameState, resPos);
+        const pieceOnSquare: Figure | null = board.getPiece(resPos);
 
         if (pieceOnSquare && areAllies(piece, pieceOnSquare)) return [];
 
@@ -30,7 +32,7 @@ function getKingMoves(gameState: GameState, pos: Position, types?: ActionType[])
       });
 
   for (const endPos of pseudoLegalKingPositions) {
-    const destroyedPiece: Figure | null = getFigure(gameState, endPos);
+    const destroyedPiece: Figure | null = board.getPiece(endPos);
 
     if (!destroyedPiece && (!types || types.includes('move'))) {
       moves.push(
@@ -56,7 +58,7 @@ function getCastlingMoves(gameState: GameState, kingPos: Position): HistoryEntry
   const board: Board = gameState.board;
   const moves: CastlingMoveInfo[] = [];
 
-  const piece: Figure | null = getFigure(gameState, kingPos);
+  const piece: Figure | null = board.getPiece(kingPos);
 
   if (!piece || piece.getPiece() !== 'king') {
     return moves;

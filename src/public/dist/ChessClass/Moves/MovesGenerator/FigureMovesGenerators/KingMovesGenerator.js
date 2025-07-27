@@ -1,29 +1,30 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getKingMoves = getKingMoves;
-const constants_1 = require("../../../constants");
-const GameStateHelperFunctions_1 = require("../../../GameStateHelperFunctions");
+const FigureOffsets_1 = require("../FigureOffsets");
 const gameStateUtils_1 = require("../../../utils/gameStateUtils");
+const LegalityCheckUtils_1 = require("../../../utils/LegalityCheckUtils");
 const historyUtils_1 = require("../../../utils/historyUtils");
 const MoveUtils_1 = require("../../../utils/MoveUtils");
 const KingChecks_1 = require("../../LegalityChecks/KingChecks");
 function getKingMoves(gameState, pos, types) {
     const moves = [];
-    const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, pos);
+    const board = gameState.board;
+    const piece = board.getPiece(pos);
     if (!piece)
         return moves;
-    const pseudoLegalKingPositions = constants_1.KING_OFFSETS
+    const pseudoLegalKingPositions = FigureOffsets_1.KING_OFFSETS
         .flatMap(offset => {
         const resPos = (0, MoveUtils_1.getPositionRelativeTo)(pos, 'forward', offset);
         if (!resPos)
             return [];
-        const pieceOnSquare = (0, GameStateHelperFunctions_1.getFigure)(gameState, resPos);
+        const pieceOnSquare = board.getPiece(resPos);
         if (pieceOnSquare && (0, gameStateUtils_1.areAllies)(piece, pieceOnSquare))
             return [];
         return [resPos];
     });
     for (const endPos of pseudoLegalKingPositions) {
-        const destroyedPiece = (0, GameStateHelperFunctions_1.getFigure)(gameState, endPos);
+        const destroyedPiece = board.getPiece(endPos);
         if (!destroyedPiece && (!types || types.includes('move'))) {
             moves.push((0, historyUtils_1.buildHistoryEntry)(gameState, (0, MoveUtils_1.getMove)(pos, endPos), null, 'move', { isPromotion: false }));
         }
@@ -39,11 +40,11 @@ function getKingMoves(gameState, pos, types) {
 function getCastlingMoves(gameState, kingPos) {
     const board = gameState.board;
     const moves = [];
-    const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, kingPos);
+    const piece = board.getPiece(kingPos);
     if (!piece || piece.getPiece() !== 'king') {
         return moves;
     }
-    if (!(0, GameStateHelperFunctions_1.isFirstMove)(gameState, kingPos) || (0, KingChecks_1.isKingChecked)(gameState, piece.getColor())) {
+    if (!(0, LegalityCheckUtils_1.isFirstMove)(gameState, kingPos) || (0, KingChecks_1.isKingChecked)(gameState, piece.getColor())) {
         return moves;
     }
     // Checking if rooks are on their places

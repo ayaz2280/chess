@@ -3,12 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildHistoryEntry = buildHistoryEntry;
 exports.isHalfMove = isHalfMove;
 const Board_1 = require("../Board/Board");
-const GameStateHelperFunctions_1 = require("../GameStateHelperFunctions");
-const HelperFunctions_1 = require("../HelperFunctions");
+const AlgNotation_1 = require("../Moves/AlgNotation/AlgNotation");
 const gameStateUtils_1 = require("./gameStateUtils");
 const MoveUtils_1 = require("./MoveUtils");
 function buildHistoryEntry(gameState, move, destroyedPiece, actionType, promotionDetails) {
-    const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, move.start);
+    const piece = gameState.board.getPiece(move.start);
     if (!piece)
         return null;
     const player = (0, gameStateUtils_1.getPlayer)(gameState, piece.getColor());
@@ -34,10 +33,10 @@ function buildHistoryEntry(gameState, move, destroyedPiece, actionType, promotio
     };
     if (actionType === 'castling') {
         const isRightRook = (0, MoveUtils_1.getMoveOffset)(move).x > 0 ? true : false;
-        const rookPos = (0, HelperFunctions_1.parseAlgNotation)(piece.getColor() === gameState.player.getColor()
+        const rookPos = (0, AlgNotation_1.parseAlgNotation)(piece.getColor() === gameState.player.getColor()
             ? isRightRook ? 'h1' : 'a1'
             : isRightRook ? 'h8' : 'a8');
-        const rook = (0, GameStateHelperFunctions_1.getFigure)(gameState, rookPos);
+        const rook = board.getPiece(rookPos);
         if (!rook)
             throw new Error('Rook not found');
         const rookMove = (0, MoveUtils_1.getMove)(rookPos, (0, MoveUtils_1.getPositionRelativeTo)(rookPos, 'forward', { x: isRightRook ? -2 : 3, y: 0 }));

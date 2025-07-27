@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.simulateMove = simulateMove;
-const GameStateHelperFunctions_1 = require("../../GameStateHelperFunctions");
+const MoveUtils_1 = require("../../utils/MoveUtils");
 const gameStateUtils_1 = require("../../utils/gameStateUtils");
 const MovesGenerator_1 = require("../MovesGenerator/MovesGenerator");
 // FUNCTION IS TO BE REVIEWED
@@ -10,9 +10,9 @@ const MovesGenerator_1 = require("../MovesGenerator/MovesGenerator");
    * @returns a new GameState object or null
    */
 function simulateMove(gameState, move) {
-    const newGameState = (0, GameStateHelperFunctions_1.cloneGameState)(gameState);
+    const newGameState = (0, gameStateUtils_1.cloneGameState)(gameState);
     //console.log(newGameState);
-    const entry = (0, MovesGenerator_1.getMoves)(newGameState, move.start).find(e => (0, GameStateHelperFunctions_1.isSameMove)(e.move, move));
+    const entry = (0, MovesGenerator_1.getMoves)(newGameState, move.start).find(e => (0, MoveUtils_1.isSameMove)(e.move, move));
     if (!entry)
         return null;
     const success = newGameState.board.move(move);

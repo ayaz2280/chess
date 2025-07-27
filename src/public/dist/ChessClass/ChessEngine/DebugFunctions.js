@@ -5,9 +5,10 @@ exports.removeFigure = removeFigure;
 exports.applyMoveDebug = applyMoveDebug;
 exports.move = move;
 const chai_1 = require("chai");
-const GameStateHelperFunctions_1 = require("../GameStateHelperFunctions");
-const HelperFunctions_1 = require("../HelperFunctions");
+const MoveUtils_1 = require("../utils/MoveUtils");
 const ChessEngine_1 = require("./ChessEngine");
+const HashConstants_1 = require("../Hashing/HashConstants");
+const HashFunctions_1 = require("../Hashing/HashFunctions");
 function placeFigure(gameState, pos, figure) {
     const board = gameState.board;
     let removedPiece = null;
@@ -20,13 +21,13 @@ function placeFigure(gameState, pos, figure) {
         return false;
     }
     if (gameState.hash === undefined) {
-        (0, GameStateHelperFunctions_1.initGameStateHash)(gameState);
+        (0, HashFunctions_1.initGameStateHash)(gameState);
     }
     else {
         if (removedPiece) {
-            gameState.hash ^= (0, HelperFunctions_1.getPieceNumber)(removedPiece.getColor(), removedPiece.getPiece(), pos);
+            gameState.hash ^= (0, HashConstants_1.getPieceNumber)(removedPiece.getColor(), removedPiece.getPiece(), pos);
         }
-        gameState.hash ^= (0, HelperFunctions_1.getPieceNumber)(figure.getColor(), figure.getPiece(), pos);
+        gameState.hash ^= (0, HashConstants_1.getPieceNumber)(figure.getColor(), figure.getPiece(), pos);
     }
     return true;
 }
@@ -36,10 +37,10 @@ function removeFigure(gameState, pos) {
     if (!removedPiece)
         return false;
     if (gameState.hash === undefined) {
-        (0, GameStateHelperFunctions_1.initGameStateHash)(gameState);
+        (0, HashFunctions_1.initGameStateHash)(gameState);
     }
     else {
-        gameState.hash ^= (0, HelperFunctions_1.getPieceNumber)(removedPiece.getColor(), removedPiece.getPiece(), pos);
+        gameState.hash ^= (0, HashConstants_1.getPieceNumber)(removedPiece.getColor(), removedPiece.getPiece(), pos);
     }
     return true;
 }
@@ -51,7 +52,7 @@ function removeFigure(gameState, pos) {
    * @returns
    */
 function applyMoveDebug(gameState, move) {
-    const entry = ChessEngine_1.ChessEngine.getLegalMoves(gameState, move.start).find(e => (0, GameStateHelperFunctions_1.isSameMove)(e.move, move));
+    const entry = ChessEngine_1.ChessEngine.getLegalMoves(gameState, move.start).find(e => (0, MoveUtils_1.isSameMove)(e.move, move));
     if (!entry)
         return false;
     ChessEngine_1.ChessEngine.applyMove(gameState, entry);

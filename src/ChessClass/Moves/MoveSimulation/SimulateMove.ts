@@ -1,6 +1,7 @@
-import { cloneGameState, isSameMove } from "../../GameStateHelperFunctions";
+
+import { isSameMove } from "../../utils/MoveUtils";
 import { CastlingMoveInfo, GameState, HistoryEntry, Move } from "../../types/ChessTypes";
-import { getPiecePosition } from "../../utils/gameStateUtils";
+import { cloneGameState, getPiecePosition } from "../../utils/gameStateUtils";
 import { getMoves } from "../MovesGenerator/MovesGenerator";
 
 // FUNCTION IS TO BE REVIEWED

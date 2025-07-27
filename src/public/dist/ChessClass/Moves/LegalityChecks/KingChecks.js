@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isKingChecked = isKingChecked;
 exports.isKingAttackedAfterMove = isKingAttackedAfterMove;
-const GameStateHelperFunctions_1 = require("../../GameStateHelperFunctions");
 const gameStateUtils_1 = require("../../utils/gameStateUtils");
 const historyUtils_1 = require("../../utils/historyUtils");
+const LegalityCheckUtils_1 = require("../../utils/LegalityCheckUtils");
 const MoveUtils_1 = require("../../utils/MoveUtils");
 const SimulateMove_1 = require("../MoveSimulation/SimulateMove");
 /**
@@ -15,8 +15,8 @@ function isKingChecked(gameState, side) {
     if (turn !== side) {
         throw new Error(`It's not ${side}'s turn to make a move!`);
     }
-    const newGameState = (0, GameStateHelperFunctions_1.cloneGameState)(gameState);
-    const kingPos = (0, GameStateHelperFunctions_1.findFigures)(newGameState, ['king'], side)[0];
+    const newGameState = (0, gameStateUtils_1.cloneGameState)(gameState);
+    const kingPos = newGameState.board.findFigures(['king'], side)[0];
     // placing a dummy entry
     newGameState.moveHistory.push((0, historyUtils_1.buildHistoryEntry)(newGameState, (0, MoveUtils_1.getMove)({ ...kingPos }, { ...kingPos }), null, 'move', { isPromotion: false }));
     return isKingAttacked(newGameState, side);
@@ -32,12 +32,12 @@ function isKingAttacked(gameState, color) {
     if (sideToMove !== opponentColor) {
         return false;
     }
-    const figPositions = (0, GameStateHelperFunctions_1.findFigures)(gameState, ['king'], color);
+    const figPositions = gameState.board.findFigures(['king'], color);
     if (figPositions.length === 0) {
         return false;
     }
     const kingPos = figPositions[0];
-    return (0, gameStateUtils_1.isSquareAttackedBy)(gameState, kingPos, opponentColor);
+    return (0, LegalityCheckUtils_1.isSquareAttackedBy)(gameState, kingPos, opponentColor);
 }
 /**
  * Simulates a move and checks if king's checked after the move's made

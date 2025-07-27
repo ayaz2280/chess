@@ -1,11 +1,43 @@
 import { Direction, Move, Position } from "../Moves/MoveTypes";
 import { Figure } from "../Figure/Figure";
-import { ColorType, GameState, HistoryEntry } from "../types/ChessTypes";
-import { Player } from "../Player/Player";
-import { findFigures, getFigure, isSamePos } from "../GameStateHelperFunctions";
+import { GameState, HistoryEntry } from "../types/ChessTypes";
+import { ComputerPlayer, HumanPlayer, Player } from "../Player/Player";
+import { isSamePos } from "./MoveUtils";
 import { getPositionRelativeTo } from "./MoveUtils";
-import { getMoves } from "../Moves/MovesGenerator/MovesGenerator";
-import { getSideToMoveNumber } from "../HelperFunctions";
+
+import { Board } from "../Board/Board";
+import { HASH_SIDE_TO_MOVE_NUMBER } from "../Hashing/HashConstants";
+import { FigureType } from "../Figure/FigureTypes";
+import { ColorType } from "../Player/PlayerTypes";
+
+
+function cloneGameState(gameState: GameState): GameState {
+  const newGameState: GameState = {
+    player: gameState.player.playerType === 'human' ? new HumanPlayer(gameState.player.getColor()) : new ComputerPlayer(gameState.player.getColor()),
+
+    opponent: gameState.opponent.playerType === 'human' ? new HumanPlayer(gameState.opponent.getColor()) : new ComputerPlayer(gameState.opponent.getColor()),
+
+    board: new Board(gameState.board.grid),
+
+    moveHistory: new Array<HistoryEntry>(...gameState.moveHistory),
+
+    checked: {
+      whiteKingChecked: gameState.checked.whiteKingChecked,
+      blackKingChecked: gameState.checked.blackKingChecked,
+    },
+    enPassantTargetFile: gameState.enPassantTargetFile,
+    castlingRights: structuredClone(gameState.castlingRights),
+    halfMoveClock: gameState.halfMoveClock,
+    sideToMove: gameState.sideToMove,
+    fullMoveCounter: gameState.fullMoveCounter,
+  }
+
+  if (gameState.hash !== undefined) {
+    newGameState.hash = gameState.hash;
+  }
+
+  return newGameState;
+}
 
 function getDirection(gameState: GameState, piece: Figure): Direction {
   return piece.getColor() === gameState.player.getColor() ? 'forward' : 'backward';
@@ -20,11 +52,13 @@ function isRankEndOfBoard(gameState: GameState, rank: number, side: ColorType): 
 }
 
 function canAttackSquare(gameState: GameState, attackerPos: Position, squareToAttack: Position, attackingOffset: Position): boolean {
-  const piece: Figure | null = getFigure(gameState, attackerPos);
+  const board: Board = gameState.board;
+
+  const piece: Figure | null = board.getPiece(attackerPos);
 
   if (!piece) return false;
 
-  const piece2: Figure | null = getFigure(gameState, squareToAttack);
+  const piece2: Figure | null = board.getPiece(squareToAttack);
 
   if (!piece2) return false;
 
@@ -48,7 +82,7 @@ function areAllies(p1: Figure, p2: Figure): boolean {
  */
 function containsInitialFigure(gameState: GameState, initPos: Position): boolean {
   if (gameState.moveHistory.length === 0) {
-    return getFigure(gameState, initPos) ? true : false;
+    return gameState.board.getPiece(initPos) ? true : false;
   }
 
   if (gameState.moveHistory[0].board.getPiece(initPos) === gameState.board.getPiece(initPos))
@@ -68,7 +102,8 @@ function nextSideToMove(gameState: GameState): ColorType {
 }
 
 function isPieceOnEndOfBoard(gameState: GameState, pos: Position): boolean {
-  const piece: Figure | null = getFigure(gameState, pos);
+  const board: Board = gameState.board;
+  const piece: Figure | null = board.getPiece(pos);
 
   if (!piece) {
     return false;
@@ -79,19 +114,7 @@ function isPieceOnEndOfBoard(gameState: GameState, pos: Position): boolean {
   return getPositionRelativeTo(pos, dir, { x: 0, y: 1 }) ? false : true;
 }
 
-function isSquareAttackedBy(gameState: GameState, square: Position, attackerSide: ColorType): boolean {
-  const attackerFigurePositions: Position[] = findFigures(gameState, 'all', attackerSide);
 
-  for (const enemyPos of attackerFigurePositions) {
-    const piece: Figure = getFigure(gameState, enemyPos) as Figure;
-
-    const endPositions: Position[] = getMoves(gameState, enemyPos, ['attackMove']).map(entry => entry.move.end);
-
-    if (endPositions.find(endP => isSamePos(endP, square))) return true;
-  }
-
-  return false;
-}
 
 function getPiecePosition(gameState: GameState, piece: Figure): Position | null {
   for (let y = 0; y <= 7; y++) {
@@ -106,15 +129,16 @@ function getPiecePosition(gameState: GameState, piece: Figure): Position | null 
 
 function flipSideToMove(gameState: GameState): void {
   gameState.sideToMove = gameState.sideToMove === 'white' ? 'black' : 'white';
-  gameState.hash! ^= getSideToMoveNumber();
+  gameState.hash! ^= HASH_SIDE_TO_MOVE_NUMBER;
 }
 
 function getDestroyedPiece(gameState: GameState, attackerPiece: Figure, move: Move): Figure | null {
+  const board: Board = gameState.board;
   if (!attackerPiece) return null;
 
   const player: Player = getPlayer(gameState, attackerPiece.getColor());
 
-  const pieceToBeDestroyed: Figure | null = getFigure(gameState, move.end);
+  const pieceToBeDestroyed: Figure | null = board.getPiece(move.end);
 
   if (!pieceToBeDestroyed) return null;
 
@@ -123,4 +147,14 @@ function getDestroyedPiece(gameState: GameState, attackerPiece: Figure, move: Mo
   return pieceToBeDestroyed;
 }
 
-export { getDirection, getPlayer,  isRankEndOfBoard, canAttackSquare, areAllies, containsInitialFigure, nextSideToMove, isPieceOnEndOfBoard, isSquareAttackedBy, getPiecePosition, flipSideToMove, getDestroyedPiece };
+export const CHAR_TO_FIGURE_MAP: Record<string, FigureType> = {
+  r: 'rook',
+  n: 'knight',
+  b: 'bishop',
+  q: 'queen',
+  k: 'king',
+  p: 'pawn'
+}
+
+
+export { getDirection, getPlayer,  isRankEndOfBoard, canAttackSquare, areAllies, containsInitialFigure, nextSideToMove, isPieceOnEndOfBoard, getPiecePosition, flipSideToMove, getDestroyedPiece, cloneGameState };

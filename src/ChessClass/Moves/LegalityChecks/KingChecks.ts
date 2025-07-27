@@ -1,7 +1,9 @@
-import { cloneGameState, findFigures } from "../../GameStateHelperFunctions";
-import { ColorType, GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
-import { isSquareAttackedBy, nextSideToMove } from "../../utils/gameStateUtils";
+
+import { ColorType } from "../../Player/PlayerTypes";
+import { GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
+import { cloneGameState, nextSideToMove } from "../../utils/gameStateUtils";
 import { buildHistoryEntry } from "../../utils/historyUtils";
+import { isSquareAttackedBy } from "../../utils/LegalityCheckUtils";
 import { getMove } from "../../utils/MoveUtils";
 import { simulateMove } from "../MoveSimulation/SimulateMove";
 
@@ -16,7 +18,7 @@ function isKingChecked(gameState: GameState, side: ColorType): boolean {
   }
 
   const newGameState: GameState = cloneGameState(gameState);
-  const kingPos: Position = findFigures(newGameState, ['king'], side)[0];
+  const kingPos: Position = newGameState.board.findFigures(['king'], side)[0];
 
   // placing a dummy entry
   newGameState.moveHistory.push(
@@ -45,7 +47,7 @@ function isKingAttacked(gameState: GameState, color: ColorType): boolean {
     return false;
   }
 
-  const figPositions: Position[] = findFigures(gameState, ['king'], color);
+  const figPositions: Position[] = gameState.board.findFigures(['king'], color);
 
   if (figPositions.length === 0) {
     return false;

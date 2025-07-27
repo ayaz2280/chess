@@ -2,14 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMoves = getMoves;
 const Cache_1 = require("../../Cache/Cache");
-const GameStateHelperFunctions_1 = require("../../GameStateHelperFunctions");
-const HelperFunctions_1 = require("../../HelperFunctions");
+const utils_1 = require("../../utils/utils");
 const BishopMovesGenerator_1 = require("./FigureMovesGenerators/BishopMovesGenerator");
 const KingMovesGenerator_1 = require("./FigureMovesGenerators/KingMovesGenerator");
 const KnightMovesGenerator_1 = require("./FigureMovesGenerators/KnightMovesGenerator");
 const PawnMovesGenerator_1 = require("./FigureMovesGenerators/PawnMovesGenerator");
 const QueenMovesGenerator_1 = require("./FigureMovesGenerators/QueenMovesGenerator");
 const RookMovesGenerator_1 = require("./FigureMovesGenerators/RookMovesGenerator");
+const HashFunctions_1 = require("../../Hashing/HashFunctions");
 const PIECE_MOVE_GENERATOR_MAP = {
     'pawn': PawnMovesGenerator_1.getPawnMoves,
     'bishop': BishopMovesGenerator_1.getBishopMoves,
@@ -24,12 +24,12 @@ const PIECE_MOVE_GENERATOR_MAP = {
  * @param position a position of a piece to  obtain legal moves from
  */
 function getMoves(gameState, position, types) {
-    const uniqueTypes = types ? (0, HelperFunctions_1.getUniqueArray)(types) : undefined;
+    const uniqueTypes = types ? (0, utils_1.getUniqueArray)(types) : undefined;
     let pseudoLegalMoves = [];
     if (!gameState.board.grid[position.y][position.x])
         return pseudoLegalMoves;
     if (!gameState.hash)
-        (0, GameStateHelperFunctions_1.initGameStateHash)(gameState);
+        (0, HashFunctions_1.initGameStateHash)(gameState);
     const typesKey = uniqueTypes ? uniqueTypes.join('_') : 'all';
     const key = `${gameState.hash}:${position.x}${position.y}:${typesKey}`;
     pseudoLegalMoves = Cache_1.PSEUDO_LEGAL_MOVES_CACHE.get(key);

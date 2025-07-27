@@ -1,12 +1,13 @@
 import { assert } from "console";
 import { Board } from "../../src/ChessClass/Board/Board";
 import { ChessEngine } from "../../src/ChessClass/ChessEngine/ChessEngine";
-import { parseAlgNotation, parseMove } from "../../src/ChessClass/HelperFunctions";
+
 import { GameState, HistoryEntry, Move } from "../../src/ChessClass/types/ChessTypes";
 import { createTestGameState, printEntries } from "../HelperTestFunctions";
 import { expect } from "chai";
 import { Figure } from "../../src/ChessClass/Figure/Figure";
 import { applyMoveDebug } from "../../src/ChessClass/ChessEngine/DebugFunctions";
+import { parseAlgNotation, parseMove } from "../../src/ChessClass/Moves/AlgNotation/AlgNotation";
 
 describe('applyMove()', () => {
   let gameState: GameState;

@@ -1,8 +1,11 @@
 import { Board } from "../../Board/Board";
 import { Figure } from "../../Figure/Figure";
-import { getFigure, isFirstMove, isSameMove } from "../../GameStateHelperFunctions";
-import { CastlingMoveInfo, ColorType, GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
-import { getMoveOffset, getPositionRelativeTo, getMove } from "../../utils/MoveUtils";
+
+import { ColorType } from "../../Player/PlayerTypes";
+
+import { CastlingMoveInfo, GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
+import { isFirstMove } from "../../utils/LegalityCheckUtils";
+import { getMoveOffset, getPositionRelativeTo, getMove, isSameMove } from "../../utils/MoveUtils";
 import { getMoves } from "../MovesGenerator/MovesGenerator";
 import { isKingAttackedAfterMove, isKingChecked } from "./KingChecks";
 
@@ -45,7 +48,7 @@ function isValidCastlingEntry(gameState: GameState, castlingEntry: CastlingMoveI
 
   const rookPos: Position = castlingEntry.rookMove.start;
 
-  const rook: Figure | null = getFigure(gameState, rookPos);
+  const rook: Figure | null = board.getPiece(rookPos);
 
   if (!rook || castlingEntry.rookPiece !== rook) return false;
   if (!isFirstMove(gameState, rookPos)) {
@@ -54,7 +57,7 @@ function isValidCastlingEntry(gameState: GameState, castlingEntry: CastlingMoveI
 
   const kingPos: Position = castlingEntry.move.start;
 
-  const king: Figure | null = getFigure(gameState, kingPos);
+  const king: Figure | null = board.getPiece(kingPos);
 
   if (!king || castlingEntry.piece !== king) {
     return false;

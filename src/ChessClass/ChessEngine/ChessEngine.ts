@@ -1,26 +1,22 @@
 import { Board } from "../Board/Board";
-import { BISHOP_OFFSET_PATHS, KING_OFFSETS, KNIGHT_OFFSETS, QUEEN_OFFSET_PATHS, ROOK_OFFSET_PATHS } from "../constants";
 import { Figure } from "../Figure/Figure";
-import { INIT_SETUP_BOARD } from "../Board/Board";
-import { inRange, positionInGrid, posToAlgNotation, parseAlgNotation, getUniqueArray, parseMove, getPieceNumber, getFilesEnPassantNumbers, getSideToMoveNumber, getCastlingRightsNumbers } from "../HelperFunctions";
-import { findFigures, getEnPassantFile, getFigure, isFirstMove, isSameHistoryEntry, requestCastlingRights } from "../GameStateHelperFunctions";
-import { isSameMove, isSamePos } from "../GameStateHelperFunctions";
-import { ComputerPlayer, HumanPlayer, Player } from "../Player/Player";
-import { ActionType, GameState, BaseMoveInfo, HistoryEntry, CastlingMoveInfo, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails } from "../types/ChessTypes";
+
+import { ComputerPlayer, HumanPlayer } from "../Player/Player";
+import { GameState, HistoryEntry, CastlingMoveInfo, PlayerDetails } from "../types/ChessTypes";
 import { ChessGrid } from "../Board/BoardTypes";
 import { FigureType } from "../Figure/FigureTypes";
-import { Direction, Move, Position } from "../Moves/MoveTypes";
-import { ColorType, PlayerType } from "../Player/PlayerTypes";
-import { cloneGameState, initGameStateHash } from "../GameStateHelperFunctions";
+import { Move, Position } from "../Moves/MoveTypes";
+import { ColorType } from "../Player/PlayerTypes";
+
 import { assert } from "console";
-import NodeCache from "node-cache";
-import { getMove, getMoveOffset, getPositionRelativeTo } from "../utils/MoveUtils";
 import { getMoves } from "../Moves/MovesGenerator/MovesGenerator";
-import { buildHistoryEntry, isHalfMove } from "../utils/historyUtils";
-import { areAllies, canAttackSquare, flipSideToMove, getPiecePosition, getPlayer, isRankEndOfBoard, nextSideToMove } from "../utils/gameStateUtils";
-import { getEnPassantPos } from "../Moves/MovesGenerator/FigureMovesGenerators/PawnMovesGenerator";
+import { isHalfMove } from "../utils/historyUtils";
+import { flipSideToMove, getPiecePosition, nextSideToMove } from "../utils/gameStateUtils";
 import { filterMoves } from "../Moves/LegalityChecks/LegalMoveValidation";
 import { flushAllCaches, LEGAL_MOVES_CACHE } from "../Cache/Cache";
+import { getPieceNumber, HASH_CASTLING_RIGHTS_NUMBERS, HASH_EN_PASSANT_FILES_NUMBERS } from "../Hashing/HashConstants";
+import { initGameStateHash } from "../Hashing/HashFunctions";
+import { requestCastlingRights, getEnPassantFile } from "../utils/evalGameStateUtils";
 
 
 export class ChessEngine {
@@ -90,7 +86,7 @@ export class ChessEngine {
     gameState.fullMoveCounter = lastEntry.prevDetails.prevFullMoveCounter;
 
     // piece on end/start numbers
-    const pieceOnEnd: Figure = getFigure(gameState, lastEntry.move.end) as Figure;
+    const pieceOnEnd: Figure = board.getPiece(lastEntry.move.end) as Figure;
 
     const pieceOnEndNumber: bigint = getPieceNumber(
       pieceOnEnd.getColor(),
@@ -152,7 +148,7 @@ export class ChessEngine {
       case 'castling': {
         const castlingEntry: CastlingMoveInfo = lastEntry as CastlingMoveInfo;
 
-        const kingOnEnd: Figure = getFigure(gameState, lastEntry.move.end) as Figure;
+        const kingOnEnd: Figure = board.getPiece(lastEntry.move.end) as Figure;
 
         const kingOnEndNumber: bigint = getPieceNumber(kingOnEnd.getColor(), kingOnEnd.getPiece(), lastEntry.move.end);
 
@@ -185,14 +181,14 @@ export class ChessEngine {
     // restoring en passant file
 
     if (gameState.enPassantTargetFile !== null) {
-      gameState.hash! ^= getFilesEnPassantNumbers()[gameState.enPassantTargetFile];
+      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[gameState.enPassantTargetFile];
       gameState.enPassantTargetFile = null;
     }
 
     const restoredEnPassantFile: number | null = getEnPassantFile(gameState);
 
     if (restoredEnPassantFile !== null) {
-      gameState.hash! ^= getFilesEnPassantNumbers()[restoredEnPassantFile];
+      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[restoredEnPassantFile];
       gameState.enPassantTargetFile = restoredEnPassantFile;
     }
     const hashBefore: bigint = gameState.hash!;
@@ -202,7 +198,7 @@ export class ChessEngine {
     for (const color of ['white', 'black'] as ColorType[]) {
       for (const side of ['kingSide', 'queenSide'] as ('kingSide' | 'queenSide')[]) {
         if (gameState.castlingRights[color][side]) {
-          gameState.hash! ^= getCastlingRightsNumbers()[iter];
+          gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[iter];
         }
         iter++;
       }
@@ -214,7 +210,7 @@ export class ChessEngine {
     for (const color of ['white', 'black'] as ColorType[]) {
       for (const side of ['kingSide', 'queenSide'] as ('kingSide' | 'queenSide')[]) {
         if (gameState.castlingRights[color][side]) {
-          gameState.hash! ^= getCastlingRightsNumbers()[iter];
+          gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[iter];
         }
         iter++;
       }
@@ -309,8 +305,9 @@ export class ChessEngine {
 
   public static applyMove(gameState: GameState, entry: HistoryEntry): void {
     gameState.board.move(entry.move);
+    const board: Board = gameState.board;
 
-    const p: Figure = getFigure(gameState, entry.move.end) as Figure;
+    const p: Figure = board.getPiece(entry.move.end) as Figure;
 
     gameState.moveHistory.push(entry);
 
@@ -341,9 +338,8 @@ export class ChessEngine {
     // xor out prev if present
     const enPassantPrevFile: number | null = gameState.enPassantTargetFile;
 
-    const enPassantNumbers: bigint[] = getFilesEnPassantNumbers();
     if (enPassantPrevFile !== null) {
-      gameState.hash! ^= enPassantNumbers[enPassantPrevFile];
+      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[enPassantPrevFile];
     }
 
 
@@ -351,7 +347,7 @@ export class ChessEngine {
     gameState.enPassantTargetFile = getEnPassantFile(gameState);
 
     if (gameState.enPassantTargetFile !== null) {
-      gameState.hash! ^= enPassantNumbers[gameState.enPassantTargetFile]
+      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[gameState.enPassantTargetFile]
     }
 
     // hash for side to move
@@ -372,7 +368,7 @@ export class ChessEngine {
         let castlingRightNumber: number = castlingSide === 'queenSide' ? 1 : 0;
         castlingRightNumber += castlingColor === 'black' ? 2 : 0;
 
-        gameState.hash! ^= getCastlingRightsNumbers()[castlingRightNumber];
+        gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[castlingRightNumber];
 
         // xor out init rook pos
         gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start);

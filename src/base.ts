@@ -1,15 +1,9 @@
-import { assert } from "chai";
-import { Board } from "./ChessClass/Board/Board";
 import { ChessEngine } from "./ChessClass/ChessEngine/ChessEngine";
-import { BISHOP_OFFSET_PATHS, PSEUDO_RANDOM_NUMBERS, QUEEN_OFFSET_PATHS, ROOK_OFFSET_PATHS } from "./ChessClass/constants";
-import { Figure } from "./ChessClass/Figure/Figure";
-import { GameManager } from "./ChessClass/GameManager";
-import { getPieceNumber, parseAlgNotation, parseMove } from "./ChessClass/HelperFunctions";
-import { calculateHash, cloneGameState, moveToAlgNotation } from "./ChessClass/GameStateHelperFunctions";
-import { GameState, BaseMoveInfo, HistoryEntry, CastlingRights } from "./ChessClass/types/ChessTypes";
-import { Move, Position } from "./ChessClass/Moves/MoveTypes";
-import { generate64BitRandomNumber } from "./ChessClass/Random";
-import { initGameStateHash } from "./ChessClass/GameStateHelperFunctions";
+
+
+import { parseAlgNotation } from "./ChessClass/Moves/AlgNotation/AlgNotation";
+import { GameState, HistoryEntry } from "./ChessClass/types/ChessTypes";
+
 
 
 declare global {

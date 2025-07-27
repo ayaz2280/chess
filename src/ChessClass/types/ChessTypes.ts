@@ -76,4 +76,4 @@ type PlayerDetails = {
 
 
 
-export type { Position, PlayerType, GameState, ColorType, Move, FigureType, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails};
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails};

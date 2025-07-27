@@ -2,15 +2,17 @@
 
 import { PSEUDO_LEGAL_MOVES_CACHE } from "../../Cache/Cache";
 import { Figure } from "../../Figure/Figure";
-import { initGameStateHash } from "../../GameStateHelperFunctions";
-import { getUniqueArray } from "../../HelperFunctions";
-import { ActionType, FigureType, GameState, HistoryEntry, Position } from "../../types/ChessTypes";
+
+import { getUniqueArray } from "../../utils/utils";
+import { ActionType, GameState, HistoryEntry, Position } from "../../types/ChessTypes";
 import { getBishopMoves } from "./FigureMovesGenerators/BishopMovesGenerator";
 import { getKingMoves } from "./FigureMovesGenerators/KingMovesGenerator";
 import { getKnightMoves } from "./FigureMovesGenerators/KnightMovesGenerator";
 import { getPawnMoves } from "./FigureMovesGenerators/PawnMovesGenerator";
 import { getQueenMoves } from "./FigureMovesGenerators/QueenMovesGenerator";
 import { getRookMoves } from "./FigureMovesGenerators/RookMovesGenerator";
+import { FigureType } from "../../Figure/FigureTypes";
+import { initGameStateHash } from "../../Hashing/HashFunctions";
 
 type PseudoLegalMoveGenerator = (gameState: GameState, pos: Position, types?: ActionType[]) => HistoryEntry[];
 

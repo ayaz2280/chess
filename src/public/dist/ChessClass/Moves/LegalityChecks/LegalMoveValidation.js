@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateMove = validateMove;
 exports.isValidCastlingEntry = isValidCastlingEntry;
 exports.filterMoves = filterMoves;
-const GameStateHelperFunctions_1 = require("../../GameStateHelperFunctions");
+const LegalityCheckUtils_1 = require("../../utils/LegalityCheckUtils");
 const MoveUtils_1 = require("../../utils/MoveUtils");
 const MovesGenerator_1 = require("../MovesGenerator/MovesGenerator");
 const KingChecks_1 = require("./KingChecks");
@@ -15,7 +15,7 @@ const KingChecks_1 = require("./KingChecks");
  */
 function validateMove(gameState, move) {
     const moves = (0, MovesGenerator_1.getMoves)(gameState, move.start);
-    const entry = moves.find(mi => (0, GameStateHelperFunctions_1.isSameMove)(move, mi.move));
+    const entry = moves.find(mi => (0, MoveUtils_1.isSameMove)(move, mi.move));
     if (!entry)
         return null;
     if (entry.type === 'castling') {
@@ -39,18 +39,18 @@ function isValidCastlingEntry(gameState, castlingEntry) {
     }
     const color = castlingEntry.player.getColor();
     const rookPos = castlingEntry.rookMove.start;
-    const rook = (0, GameStateHelperFunctions_1.getFigure)(gameState, rookPos);
+    const rook = board.getPiece(rookPos);
     if (!rook || castlingEntry.rookPiece !== rook)
         return false;
-    if (!(0, GameStateHelperFunctions_1.isFirstMove)(gameState, rookPos)) {
+    if (!(0, LegalityCheckUtils_1.isFirstMove)(gameState, rookPos)) {
         return false;
     }
     const kingPos = castlingEntry.move.start;
-    const king = (0, GameStateHelperFunctions_1.getFigure)(gameState, kingPos);
+    const king = board.getPiece(kingPos);
     if (!king || castlingEntry.piece !== king) {
         return false;
     }
-    if (!(0, GameStateHelperFunctions_1.isFirstMove)(gameState, kingPos)) {
+    if (!(0, LegalityCheckUtils_1.isFirstMove)(gameState, kingPos)) {
         return false;
     }
     const isKingSideCastling = (0, MoveUtils_1.getMoveOffset)(castlingEntry.move).x > 0;

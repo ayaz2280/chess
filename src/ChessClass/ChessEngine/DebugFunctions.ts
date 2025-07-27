@@ -1,11 +1,14 @@
 import { assert } from "chai";
 import { Board } from "../Board/Board";
 import { Figure } from "../Figure/Figure";
-import { initGameStateHash, isSameMove } from "../GameStateHelperFunctions";
-import { getPieceNumber } from "../HelperFunctions";
+
+import { isSameMove } from "../utils/MoveUtils";
+
 import { Move, Position } from "../Moves/MoveTypes";
 import { GameState, HistoryEntry } from "../types/ChessTypes";
 import { ChessEngine } from "./ChessEngine";
+import { getPieceNumber } from "../Hashing/HashConstants";
+import { initGameStateHash } from "../Hashing/HashFunctions";
 
 function placeFigure(gameState: GameState, pos: Position, figure: Figure): boolean {
   const board: Board = gameState.board;

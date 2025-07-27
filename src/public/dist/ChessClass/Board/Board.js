@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.INIT_SETUP_BOARD = exports.Board = void 0;
 exports.getInitialBoard = getInitialBoard;
 const Figure_1 = require("../Figure/Figure");
-const HelperFunctions_1 = require("../HelperFunctions");
+const utils_1 = require("../utils/utils");
+const boardUtils_1 = require("../utils/boardUtils");
 class Board {
     grid;
     constructor(grid) {
@@ -38,7 +39,7 @@ class Board {
         return newGrid;
     }
     move(move) {
-        if (!(0, HelperFunctions_1.positionInGrid)(move.start) || !(0, HelperFunctions_1.positionInGrid)(move.end)) {
+        if (!(0, boardUtils_1.positionInGrid)(move.start) || !(0, boardUtils_1.positionInGrid)(move.end)) {
             throw new Error(`Move is out of grid`);
         }
         if (!this.grid[move.start.y][move.start.x]) {
@@ -53,13 +54,13 @@ class Board {
         const showDimension = showDimensions ?? true;
         const dimensionColor = dimensionColorCode ?? 34;
         for (let y = 7; y >= 0; y--) {
-            let row = `${(0, HelperFunctions_1.styled)(`${y + 1}`, dimensionColor)}${separator}${Board.getRowString(this.grid[y], separator, emptyCell)}`;
+            let row = `${(0, utils_1.styled)(`${y + 1}`, dimensionColor)}${separator}${Board.getRowString(this.grid[y], separator, emptyCell)}`;
             console.log(row);
         }
         if (showDimension) {
             const letters = [`${separator}`, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
             letters.forEach((val, id) => {
-                letters[id] = (0, HelperFunctions_1.styled)(val, dimensionColor);
+                letters[id] = (0, utils_1.styled)(val, dimensionColor);
             });
             console.log(letters.join(separator));
         }
@@ -81,10 +82,10 @@ class Board {
         const pieceName = piece.getPiece() === 'knight' ? 'N'
             : piece.getPiece().charAt(0).toUpperCase();
         const colorCode = piece.getColor() === 'white' ? 37 : 30;
-        return (0, HelperFunctions_1.styled)(pieceName, colorCode);
+        return (0, utils_1.styled)(pieceName, colorCode);
     }
     place(piece, coord) {
-        if (!(0, HelperFunctions_1.positionInGrid)(coord)) {
+        if (!(0, boardUtils_1.positionInGrid)(coord)) {
             throw new Error(`Position {x: ${coord.x}, y: ${coord.y}} is out of grid`);
         }
         const pieceOnSquare = this.removePiece(coord);
@@ -92,19 +93,37 @@ class Board {
         return pieceOnSquare;
     }
     removePiece(pos) {
-        if (!(0, HelperFunctions_1.positionInGrid)(pos))
+        if (!(0, boardUtils_1.positionInGrid)(pos))
             return null;
         let piece = this.grid[pos.y][pos.x];
         this.grid[pos.y][pos.x] = null;
         return piece;
     }
     getPiece(pos) {
-        if (!(0, HelperFunctions_1.positionInGrid)(pos))
+        if (!(0, boardUtils_1.positionInGrid)(pos))
             return null;
         return this.grid[pos.y][pos.x];
     }
     isOccupied(pos) {
         return this.grid[pos.y][pos.x] ? true : false;
+    }
+    findFigures(pieceTypes, color) {
+        const found = [];
+        const uniquePieceTypes = pieceTypes === 'all'
+            ? ['bishop', 'king', 'knight', 'pawn', 'queen', 'rook']
+            : (0, utils_1.getUniqueArray)(pieceTypes);
+        for (let y = 0; y < 8; y++) {
+            for (let x = 0; x < 8; x++) {
+                const pos = { x: x, y: y };
+                const piece = this.getPiece(pos);
+                if (!piece)
+                    continue;
+                if ((color === 'both' || color === piece.getColor()) &&
+                    uniquePieceTypes.includes(piece.getPiece()))
+                    found.push(pos);
+            }
+        }
+        return found;
     }
 }
 exports.Board = Board;

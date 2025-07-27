@@ -1,11 +1,13 @@
 import { Board } from "../../../Board/Board";
 import { Figure } from "../../../Figure/Figure";
-import { isFirstMove, getFigure } from "../../../GameStateHelperFunctions";
-import { ActionType, FigureType, GameState, HistoryEntry, Move, Position } from "../../../types/ChessTypes";
+
+import { ActionType, GameState, HistoryEntry, Move, Position } from "../../../types/ChessTypes";
 import { Direction } from "../../MoveTypes";
 import { getMove, getMoveOffset, getPositionRelativeTo } from "../../../utils/MoveUtils";
 import { buildHistoryEntry } from "../../../utils/historyUtils";
 import { canAttackSquare, getDirection, isRankEndOfBoard } from "../../../utils/gameStateUtils";
+import { isFirstMove } from "../../../utils/LegalityCheckUtils";
+import { FigureType } from "../../../Figure/FigureTypes";
 
 function getPawnMoves(gameState: GameState, pos: Position, types?: ActionType[]): HistoryEntry[] {
   const board: Board = gameState.board;
@@ -131,7 +133,7 @@ function getPawnMoves(gameState: GameState, pos: Position, types?: ActionType[])
     if (rightDiagonal) {
       if (canAttackSquare(gameState, pos, rightDiagonal, rightDiagonalOffset)) {
         move = getMove(pos, rightDiagonal);
-        const destroyedPiece: Figure = getFigure(gameState, move.end) as Figure;
+        const destroyedPiece: Figure = board.getPiece(move.end) as Figure;
 
         if (isRankEndOfBoard(gameState, rightDiagonal.y, piece.getColor())) {
           const figureTypes: (Exclude<FigureType, 'king' | 'pawn'>)[] = ['bishop', 'knight', 'queen', 'rook'];
@@ -161,7 +163,7 @@ function getPawnMoves(gameState: GameState, pos: Position, types?: ActionType[])
 
     if (enPassantPos) {
       move = getMove(pos, enPassantPos);
-      entry = buildHistoryEntry(gameState, move, getFigure(gameState, getPositionRelativeTo(enPassantPos, dir, { x: 0, y: -1 }) as Position), 'enPassant', { isPromotion: false });
+      entry = buildHistoryEntry(gameState, move, board.getPiece(getPositionRelativeTo(enPassantPos, dir, { x: 0, y: -1 }) as Position), 'enPassant', { isPromotion: false });
 
       if (entry) {
         moves.push(entry);
@@ -173,7 +175,8 @@ function getPawnMoves(gameState: GameState, pos: Position, types?: ActionType[])
 }
 
 function getEnPassantPos(gameState: GameState, pos: Position): Position | null {
-  const piece: Figure | null = getFigure(gameState, pos);
+  const board: Board = gameState.board;
+  const piece: Figure | null = board.getPiece(pos);
 
   if (!piece || piece.getPiece() !== 'pawn') return null;
   if (gameState.moveHistory.length === 0) return null;
@@ -206,10 +209,8 @@ function getEnPassantPos(gameState: GameState, pos: Position): Position | null {
   }
 
   if (leftPos) {
-    const leftPawn: Figure | null = getFigure(
-      gameState,
-      leftPos
-    );
+    const leftPawn: Figure | null = board.getPiece(leftPos);
+
     if (leftPawn && leftPawn === lastHistoryEntry.piece) {
       const enPassantOffset: Position = { x: -1, y: 1 };
       const enPassantPos: Position = getPositionRelativeTo(pos, dir, enPassantOffset) as Position;
@@ -222,10 +223,8 @@ function getEnPassantPos(gameState: GameState, pos: Position): Position | null {
   }
 
   if (rightPos) {
-    const rightPawn: Figure | null = getFigure(
-      gameState,
-      rightPos
-    );
+    const rightPawn: Figure | null = board.getPiece(rightPos);
+
     if (rightPawn && rightPawn === lastHistoryEntry.piece) {
       const enPassantOffset: Position = { x: 1, y: 1 };
       const enPassantPos: Position = getPositionRelativeTo(pos, dir, enPassantOffset) as Position;

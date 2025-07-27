@@ -1,14 +1,15 @@
-import { QUEEN_OFFSET_PATHS } from "../../../constants";
+import { QUEEN_OFFSET_PATHS } from '../FigureOffsets';
 import { Figure } from "../../../Figure/Figure";
-import { getFigure } from "../../../GameStateHelperFunctions";
 import { ActionType, GameState, HistoryEntry, Position } from "../../../types/ChessTypes";
 import { areAllies } from "../../../utils/gameStateUtils";
 import { buildHistoryEntry } from "../../../utils/historyUtils";
 import { getPositionRelativeTo, getMove } from "../../../utils/MoveUtils";
+import { Board } from '../../../Board/Board';
 
 function getQueenMoves(gameState: GameState, pos: Position, types?: ActionType[]): HistoryEntry[] {
-    const moves: HistoryEntry[] = [];
-  const piece: Figure | null = getFigure(gameState, pos);
+  const moves: HistoryEntry[] = [];
+  const board: Board = gameState.board;
+  const piece: Figure | null = board.getPiece(pos);
 
   if (!piece) return moves;
 
@@ -20,7 +21,7 @@ function getQueenMoves(gameState: GameState, pos: Position, types?: ActionType[]
           const resPos: Position | null = getPositionRelativeTo(pos, 'forward', offset);
           if (!resPos) break;
 
-          const pieceOnSquare: Figure | null = getFigure(gameState, resPos);
+          const pieceOnSquare: Figure | null = board.getPiece(resPos);
 
           if (pieceOnSquare && areAllies(piece, pieceOnSquare)) {
             break;
@@ -35,7 +36,7 @@ function getQueenMoves(gameState: GameState, pos: Position, types?: ActionType[]
       });
 
   for (const endPos of pseudoLegalQueenPositions) {
-    const destroyedPiece: Figure | null = getFigure(gameState, endPos);
+    const destroyedPiece: Figure | null = board.getPiece(endPos);
 
     if (!destroyedPiece && (!types || types.includes('move'))) {
       moves.push(

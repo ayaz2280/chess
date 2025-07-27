@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPawnMoves = getPawnMoves;
 exports.getEnPassantPos = getEnPassantPos;
-const GameStateHelperFunctions_1 = require("../../../GameStateHelperFunctions");
 const MoveUtils_1 = require("../../../utils/MoveUtils");
 const historyUtils_1 = require("../../../utils/historyUtils");
 const gameStateUtils_1 = require("../../../utils/gameStateUtils");
+const LegalityCheckUtils_1 = require("../../../utils/LegalityCheckUtils");
 function getPawnMoves(gameState, pos, types) {
     const board = gameState.board;
     const piece = board.grid[pos.y][pos.x];
@@ -19,7 +19,7 @@ function getPawnMoves(gameState, pos, types) {
     // moves of type 'move'
     if (!types ||
         types.includes('move')) {
-        if ((0, GameStateHelperFunctions_1.isFirstMove)(gameState, pos)) {
+        if ((0, LegalityCheckUtils_1.isFirstMove)(gameState, pos)) {
             const offset = {
                 x: 0,
                 y: 2,
@@ -103,7 +103,7 @@ function getPawnMoves(gameState, pos, types) {
         if (rightDiagonal) {
             if ((0, gameStateUtils_1.canAttackSquare)(gameState, pos, rightDiagonal, rightDiagonalOffset)) {
                 move = (0, MoveUtils_1.getMove)(pos, rightDiagonal);
-                const destroyedPiece = (0, GameStateHelperFunctions_1.getFigure)(gameState, move.end);
+                const destroyedPiece = board.getPiece(move.end);
                 if ((0, gameStateUtils_1.isRankEndOfBoard)(gameState, rightDiagonal.y, piece.getColor())) {
                     const figureTypes = ['bishop', 'knight', 'queen', 'rook'];
                     figureTypes.forEach((figType) => {
@@ -127,7 +127,7 @@ function getPawnMoves(gameState, pos, types) {
         const enPassantPos = getEnPassantPos(gameState, pos);
         if (enPassantPos) {
             move = (0, MoveUtils_1.getMove)(pos, enPassantPos);
-            entry = (0, historyUtils_1.buildHistoryEntry)(gameState, move, (0, GameStateHelperFunctions_1.getFigure)(gameState, (0, MoveUtils_1.getPositionRelativeTo)(enPassantPos, dir, { x: 0, y: -1 })), 'enPassant', { isPromotion: false });
+            entry = (0, historyUtils_1.buildHistoryEntry)(gameState, move, board.getPiece((0, MoveUtils_1.getPositionRelativeTo)(enPassantPos, dir, { x: 0, y: -1 })), 'enPassant', { isPromotion: false });
             if (entry) {
                 moves.push(entry);
             }
@@ -136,7 +136,8 @@ function getPawnMoves(gameState, pos, types) {
     return moves;
 }
 function getEnPassantPos(gameState, pos) {
-    const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, pos);
+    const board = gameState.board;
+    const piece = board.getPiece(pos);
     if (!piece || piece.getPiece() !== 'pawn')
         return null;
     if (gameState.moveHistory.length === 0)
@@ -159,7 +160,7 @@ function getEnPassantPos(gameState, pos) {
         return null;
     }
     if (leftPos) {
-        const leftPawn = (0, GameStateHelperFunctions_1.getFigure)(gameState, leftPos);
+        const leftPawn = board.getPiece(leftPos);
         if (leftPawn && leftPawn === lastHistoryEntry.piece) {
             const enPassantOffset = { x: -1, y: 1 };
             const enPassantPos = (0, MoveUtils_1.getPositionRelativeTo)(pos, dir, enPassantOffset);
@@ -171,7 +172,7 @@ function getEnPassantPos(gameState, pos) {
         }
     }
     if (rightPos) {
-        const rightPawn = (0, GameStateHelperFunctions_1.getFigure)(gameState, rightPos);
+        const rightPawn = board.getPiece(rightPos);
         if (rightPawn && rightPawn === lastHistoryEntry.piece) {
             const enPassantOffset = { x: 1, y: 1 };
             const enPassantPos = (0, MoveUtils_1.getPositionRelativeTo)(pos, dir, enPassantOffset);

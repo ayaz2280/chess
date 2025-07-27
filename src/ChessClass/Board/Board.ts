@@ -1,8 +1,10 @@
 import { Figure } from "../Figure/Figure";
-import { inRange, positionInGrid, styled } from "../HelperFunctions";
+import { getUniqueArray, styled } from "../utils/utils";
+import { positionInGrid } from "../utils/boardUtils";
 import type { ChessGrid } from "./BoardTypes";
 import type { FigureType } from "../Figure/FigureTypes";
 import type { Move, Position } from "../Moves/MoveTypes";
+import { ColorType } from "../Player/PlayerTypes";
 
 class Board {
   grid: ChessGrid;
@@ -128,6 +130,28 @@ class Board {
 
   isOccupied(pos: Position): boolean {
     return this.grid[pos.y][pos.x] ? true : false;
+  }
+
+  findFigures(pieceTypes: FigureType[] | 'all', color: ColorType | 'both'): Position[] {
+    const found: Position[] = [];
+    const uniquePieceTypes: FigureType[] =
+      pieceTypes === 'all'
+        ? ['bishop', 'king', 'knight', 'pawn', 'queen', 'rook']
+        : getUniqueArray(pieceTypes);
+
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const pos: Position = { x: x, y: y };
+        const piece: Figure | null = this.getPiece(pos);
+
+        if (!piece) continue;
+
+        if ((color === 'both' || color === piece.getColor()) &&
+          uniquePieceTypes.includes(piece.getPiece())) found.push(pos);
+      }
+    }
+
+    return found;
   }
 }
 

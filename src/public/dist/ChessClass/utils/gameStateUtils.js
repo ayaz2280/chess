@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CHAR_TO_FIGURE_MAP = void 0;
 exports.getDirection = getDirection;
 exports.getPlayer = getPlayer;
 exports.isRankEndOfBoard = isRankEndOfBoard;
@@ -8,14 +9,36 @@ exports.areAllies = areAllies;
 exports.containsInitialFigure = containsInitialFigure;
 exports.nextSideToMove = nextSideToMove;
 exports.isPieceOnEndOfBoard = isPieceOnEndOfBoard;
-exports.isSquareAttackedBy = isSquareAttackedBy;
 exports.getPiecePosition = getPiecePosition;
 exports.flipSideToMove = flipSideToMove;
 exports.getDestroyedPiece = getDestroyedPiece;
-const GameStateHelperFunctions_1 = require("../GameStateHelperFunctions");
+exports.cloneGameState = cloneGameState;
+const Player_1 = require("../Player/Player");
 const MoveUtils_1 = require("./MoveUtils");
-const MovesGenerator_1 = require("../Moves/MovesGenerator/MovesGenerator");
-const HelperFunctions_1 = require("../HelperFunctions");
+const MoveUtils_2 = require("./MoveUtils");
+const Board_1 = require("../Board/Board");
+const HashConstants_1 = require("../Hashing/HashConstants");
+function cloneGameState(gameState) {
+    const newGameState = {
+        player: gameState.player.playerType === 'human' ? new Player_1.HumanPlayer(gameState.player.getColor()) : new Player_1.ComputerPlayer(gameState.player.getColor()),
+        opponent: gameState.opponent.playerType === 'human' ? new Player_1.HumanPlayer(gameState.opponent.getColor()) : new Player_1.ComputerPlayer(gameState.opponent.getColor()),
+        board: new Board_1.Board(gameState.board.grid),
+        moveHistory: new Array(...gameState.moveHistory),
+        checked: {
+            whiteKingChecked: gameState.checked.whiteKingChecked,
+            blackKingChecked: gameState.checked.blackKingChecked,
+        },
+        enPassantTargetFile: gameState.enPassantTargetFile,
+        castlingRights: structuredClone(gameState.castlingRights),
+        halfMoveClock: gameState.halfMoveClock,
+        sideToMove: gameState.sideToMove,
+        fullMoveCounter: gameState.fullMoveCounter,
+    };
+    if (gameState.hash !== undefined) {
+        newGameState.hash = gameState.hash;
+    }
+    return newGameState;
+}
 function getDirection(gameState, piece) {
     return piece.getColor() === gameState.player.getColor() ? 'forward' : 'backward';
 }
@@ -26,16 +49,17 @@ function isRankEndOfBoard(gameState, rank, side) {
     return gameState.player.getColor() === side ? rank === 7 : rank === 0;
 }
 function canAttackSquare(gameState, attackerPos, squareToAttack, attackingOffset) {
-    const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, attackerPos);
+    const board = gameState.board;
+    const piece = board.getPiece(attackerPos);
     if (!piece)
         return false;
-    const piece2 = (0, GameStateHelperFunctions_1.getFigure)(gameState, squareToAttack);
+    const piece2 = board.getPiece(squareToAttack);
     if (!piece2)
         return false;
     if (areAllies(piece, piece2))
         return false;
-    const calculatedSquare = (0, MoveUtils_1.getPositionRelativeTo)(attackerPos, getDirection(gameState, piece), attackingOffset);
-    if (!calculatedSquare || !(0, GameStateHelperFunctions_1.isSamePos)(calculatedSquare, squareToAttack))
+    const calculatedSquare = (0, MoveUtils_2.getPositionRelativeTo)(attackerPos, getDirection(gameState, piece), attackingOffset);
+    if (!calculatedSquare || !(0, MoveUtils_1.isSamePos)(calculatedSquare, squareToAttack))
         return false;
     return true;
 }
@@ -49,7 +73,7 @@ function areAllies(p1, p2) {
  */
 function containsInitialFigure(gameState, initPos) {
     if (gameState.moveHistory.length === 0) {
-        return (0, GameStateHelperFunctions_1.getFigure)(gameState, initPos) ? true : false;
+        return gameState.board.getPiece(initPos) ? true : false;
     }
     if (gameState.moveHistory[0].board.getPiece(initPos) === gameState.board.getPiece(initPos))
         return true;
@@ -64,22 +88,13 @@ function nextSideToMove(gameState) {
     return 'white' === lastEntry.player.getColor() ? 'black' : 'white';
 }
 function isPieceOnEndOfBoard(gameState, pos) {
-    const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, pos);
+    const board = gameState.board;
+    const piece = board.getPiece(pos);
     if (!piece) {
         return false;
     }
     const dir = getDirection(gameState, piece);
-    return (0, MoveUtils_1.getPositionRelativeTo)(pos, dir, { x: 0, y: 1 }) ? false : true;
-}
-function isSquareAttackedBy(gameState, square, attackerSide) {
-    const attackerFigurePositions = (0, GameStateHelperFunctions_1.findFigures)(gameState, 'all', attackerSide);
-    for (const enemyPos of attackerFigurePositions) {
-        const piece = (0, GameStateHelperFunctions_1.getFigure)(gameState, enemyPos);
-        const endPositions = (0, MovesGenerator_1.getMoves)(gameState, enemyPos, ['attackMove']).map(entry => entry.move.end);
-        if (endPositions.find(endP => (0, GameStateHelperFunctions_1.isSamePos)(endP, square)))
-            return true;
-    }
-    return false;
+    return (0, MoveUtils_2.getPositionRelativeTo)(pos, dir, { x: 0, y: 1 }) ? false : true;
 }
 function getPiecePosition(gameState, piece) {
     for (let y = 0; y <= 7; y++) {
@@ -93,17 +108,26 @@ function getPiecePosition(gameState, piece) {
 }
 function flipSideToMove(gameState) {
     gameState.sideToMove = gameState.sideToMove === 'white' ? 'black' : 'white';
-    gameState.hash ^= (0, HelperFunctions_1.getSideToMoveNumber)();
+    gameState.hash ^= HashConstants_1.HASH_SIDE_TO_MOVE_NUMBER;
 }
 function getDestroyedPiece(gameState, attackerPiece, move) {
+    const board = gameState.board;
     if (!attackerPiece)
         return null;
     const player = getPlayer(gameState, attackerPiece.getColor());
-    const pieceToBeDestroyed = (0, GameStateHelperFunctions_1.getFigure)(gameState, move.end);
+    const pieceToBeDestroyed = board.getPiece(move.end);
     if (!pieceToBeDestroyed)
         return null;
     if (areAllies(attackerPiece, pieceToBeDestroyed))
         return null;
     return pieceToBeDestroyed;
 }
+exports.CHAR_TO_FIGURE_MAP = {
+    r: 'rook',
+    n: 'knight',
+    b: 'bishop',
+    q: 'queen',
+    k: 'king',
+    p: 'pawn'
+};
 //# sourceMappingURL=gameStateUtils.js.map
