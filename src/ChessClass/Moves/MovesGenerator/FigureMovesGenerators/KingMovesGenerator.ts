@@ -7,7 +7,6 @@ import { areAllies, containsInitialFigure, getDirection } from "../../../utils/g
 import { isFirstMove } from "../../../utils/LegalityCheckUtils";
 import { buildHistoryEntry } from "../../../utils/historyUtils";
 import { getPositionRelativeTo, getMove } from "../../../utils/MoveUtils";
-import { isKingChecked } from "../../LegalityChecks/KingChecks";
 import { Position, Direction, Move } from "../../MoveTypes";
 
 function getKingMoves(gameState: GameState, pos: Position, types?: ActionType[]): HistoryEntry[] {
@@ -64,7 +63,7 @@ function getCastlingMoves(gameState: GameState, kingPos: Position): HistoryEntry
     return moves;
   }
 
-  if (!isFirstMove(gameState, kingPos) || isKingChecked(gameState, piece.getColor())) {
+  if (!isFirstMove(gameState, kingPos)) {
     return moves;
   }
 
