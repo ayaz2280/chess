@@ -3,7 +3,8 @@ import { parseMove } from "../Moves/AlgNotation/AlgNotation";
 import { Position } from "../Moves/MoveTypes";
 import { ColorType } from "../Player/PlayerTypes";
 import { GameState, HistoryEntry, CastlingRights } from "../types/ChessTypes";
-import { isFirstMove } from "./LegalityCheckUtils";
+import { isFirstMove } from "./gameStateMovementUtils";
+
 import { getMoveOffset, getPositionRelativeTo, isSamePos } from "./MoveUtils";
 
 function getEnPassantFile(gameState: GameState): number | null {

@@ -6,8 +6,9 @@ import { Direction } from "../../MoveTypes";
 import { getMove, getMoveOffset, getPositionRelativeTo } from "../../../utils/MoveUtils";
 import { buildHistoryEntry } from "../../../utils/historyUtils";
 import { canAttackSquare, getDirection, isRankEndOfBoard } from "../../../utils/gameStateUtils";
-import { isFirstMove } from "../../../utils/LegalityCheckUtils";
+
 import { FigureType } from "../../../Figure/FigureTypes";
+import { isFirstMove } from "../../../utils/gameStateMovementUtils";
 
 function getPawnMoves(gameState: GameState, pos: Position, types?: ActionType[]): HistoryEntry[] {
   const board: Board = gameState.board;

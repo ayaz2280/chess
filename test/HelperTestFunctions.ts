@@ -45,6 +45,7 @@ const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorTyp
     halfMoveClock: 0,
     sideToMove: currentPlayerColor,
     fullMoveCounter: 1,
+    hash: 0n,
   };
   gameState.castlingRights = requestCastlingRights(gameState);
   gameState.enPassantTargetFile = getEnPassantFile(gameState);

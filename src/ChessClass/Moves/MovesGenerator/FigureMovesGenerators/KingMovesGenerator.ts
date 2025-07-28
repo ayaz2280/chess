@@ -4,10 +4,11 @@ import { Figure } from "../../../Figure/Figure";
 
 import { HistoryEntry, GameState, CastlingMoveInfo, ActionType } from "../../../types/ChessTypes";
 import { areAllies, containsInitialFigure, getDirection } from "../../../utils/gameStateUtils";
-import { isFirstMove } from "../../../utils/LegalityCheckUtils";
+
 import { buildHistoryEntry } from "../../../utils/historyUtils";
 import { getPositionRelativeTo, getMove } from "../../../utils/MoveUtils";
 import { Position, Direction, Move } from "../../MoveTypes";
+import { isFirstMove } from "../../../utils/gameStateMovementUtils";
 
 function getKingMoves(gameState: GameState, pos: Position, types?: ActionType[]): HistoryEntry[] {
   const moves: HistoryEntry[] = [];

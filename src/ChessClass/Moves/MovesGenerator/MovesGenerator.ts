@@ -12,7 +12,6 @@ import { getPawnMoves } from "./FigureMovesGenerators/PawnMovesGenerator";
 import { getQueenMoves } from "./FigureMovesGenerators/QueenMovesGenerator";
 import { getRookMoves } from "./FigureMovesGenerators/RookMovesGenerator";
 import { FigureType } from "../../Figure/FigureTypes";
-import { initGameStateHash } from "../../Hashing/HashFunctions";
 
 type PseudoLegalMoveGenerator = (gameState: GameState, pos: Position, types?: ActionType[]) => HistoryEntry[];
 
@@ -36,8 +35,6 @@ function getMoves(gameState: GameState, position: Position, types?: ActionType[]
   let pseudoLegalMoves: HistoryEntry[] | undefined = [];
 
   if (!gameState.board.grid[position.y][position.x]) return pseudoLegalMoves;
-
-  if (!gameState.hash) initGameStateHash(gameState);
 
   const typesKey: string = uniqueTypes ? uniqueTypes.join('_') : 'all';
 

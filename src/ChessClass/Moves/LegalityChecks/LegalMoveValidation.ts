@@ -4,7 +4,8 @@ import { Figure } from "../../Figure/Figure";
 import { ColorType } from "../../Player/PlayerTypes";
 
 import { CastlingMoveInfo, GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
-import { isFirstMove } from "../../utils/LegalityCheckUtils";
+import { isFirstMove } from "../../utils/gameStateMovementUtils";
+
 import { getMoveOffset, getPositionRelativeTo, getMove, isSameMove } from "../../utils/MoveUtils";
 import { getMoves } from "../MovesGenerator/MovesGenerator";
 import { isKingAttackedAfterMove, isKingChecked } from "./KingChecks";
