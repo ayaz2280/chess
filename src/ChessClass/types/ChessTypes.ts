@@ -62,7 +62,7 @@ type GameState = {
     whiteKingChecked: boolean,
     blackKingChecked: boolean,
   }
-  hash?: bigint,
+  hash: bigint,
   castlingRights: CastlingRights,
   enPassantTargetFile: number | null,
   halfMoveClock: number,

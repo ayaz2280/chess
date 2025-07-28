@@ -1,15 +1,19 @@
-import { Board } from '../../src/ChessClass/Board';
-import { ChessEngine } from '../../src/ChessClass/ChessEngine';
-import { Figure } from '../../src/ChessClass/Figure/Figure';
-import { initGameStateHash } from '../../src/ChessClass/GameStateHelperFunctions';
-import { getSideToMoveNumber, getFilesEnPassantNumbers, getCastlingRightsNumbers, getPieceNumber, parseMove } from '../../src/ChessClass/HelperFunctions';
-import { HumanPlayer, ComputerPlayer } from '../../src/ChessClass/Player';
-import {CastlingMoveInfo, ColorType, GameState, HistoryEntry, Move, Position} from '../../src/ChessClass/types/ChessTypes';
+
 // No direct import of PSEUDO_RANDOM_NUMBERS, PIECE_COLOR, PIECE_TYPE here as HelperFunctions already uses them
 // and we rely on the fixed seed in Random.ts for determinism.
 
 // Import Chai for assertions
 import { expect } from 'chai';
+import { Board } from '../../src/ChessClass/Board/Board';
+import { ChessEngine } from '../../src/ChessClass/ChessEngine/ChessEngine';
+import { Figure } from '../../src/ChessClass/Figure/Figure';
+import { getPieceNumber } from '../../src/ChessClass/Hashing/HashConstants';
+import { initGameStateHash } from '../../src/ChessClass/Hashing/HashFunctions';
+import { parseMove } from '../../src/ChessClass/Moves/AlgNotation/AlgNotation';
+import { Position, Move } from '../../src/ChessClass/Moves/MoveTypes';
+import { HumanPlayer, ComputerPlayer } from '../../src/ChessClass/Player/Player';
+import { ColorType } from '../../src/ChessClass/Player/PlayerTypes';
+import { GameState, HistoryEntry, CastlingMoveInfo } from '../../src/ChessClass/types/ChessTypes';
 // If you prefer assert style: import { assert } from 'chai';
 
 // --- Helper function for testing: Deep clone GameState for isolation ---
@@ -18,160 +22,7 @@ import { expect } from 'chai';
 // to ensure it handles the hash correctly for testing purposes.
 // For testing purposes, we'll ensure the history is also cloned deeply enough
 // so that undoing a move doesn't affect the original state's history.
-function deepCloneGameStateForTesting(gameState: GameState): GameState {
-    const newGameState: GameState = {
-        player: gameState.player.playerType === 'human' ? new HumanPlayer(gameState.player.getColor()) : new ComputerPlayer(gameState.player.getColor()),
-        opponent: gameState.opponent.playerType === 'human' ? new HumanPlayer(gameState.opponent.getColor()) : new ComputerPlayer(gameState.opponent.getColor()),
-        board: new Board(gameState.board.grid), // Board.cloneGrid handles deep cloning of grid
-        moveHistory: gameState.moveHistory.map(entry => {
-            // Deep clone history entries, especially pieces and boards within them
-            const clonedEntry: HistoryEntry = {
-                ...entry,
-                piece: Figure.clone(entry.piece),
-                board: new Board(entry.board.grid), // Clone board within history entry
-                destroyedPiece: entry.destroyedPiece ? Figure.clone(entry.destroyedPiece) : null,
-                player: entry.player.playerType === 'human' ? new HumanPlayer(entry.player.getColor()) : new ComputerPlayer(entry.player.getColor()),
-            };
-            if (clonedEntry.type === 'castling') {
-                const castlingEntry = entry as CastlingMoveInfo;
-                (clonedEntry as CastlingMoveInfo).rookPiece = Figure.clone(castlingEntry.rookPiece);
-            }
-            return clonedEntry;
-        }),
-        checked: {
-            whiteKingChecked: gameState.checked.whiteKingChecked,
-            blackKingChecked: gameState.checked.blackKingChecked,
-        },
-        enPassantTargetFile: gameState.enPassantTargetFile,
-        castlingRights: {
-            white: { ...gameState.castlingRights.white },
-            black: { ...gameState.castlingRights.black },
-        },
-        hash: gameState.hash, // Hash is a bigint, so direct assignment is fine
-    };
-    return newGameState;
-}
 
-// --- Undo Move Function for Testing ---
-// This function attempts to reverse the state changes and hash updates
-// made by ChessEngine.applyMove for testing purposes.
-// A full, robust undo in a chess engine would be more complex and likely
-// would store more specific state changes in the HistoryEntry.
-function undoLastMove(gameState: GameState): void {
-    if (gameState.moveHistory.length === 0) {
-        return;
-    }
-
-    const lastEntry = gameState.moveHistory.pop() as HistoryEntry;
-
-    // Revert board state (simplified: just put pieces back)
-    // This is a simplified undo. A full undo needs to reverse all changes made by applyMove.
-    gameState.board.place(lastEntry.piece, lastEntry.move.start);
-    if (lastEntry.destroyedPiece) {
-        // For captures, put the destroyed piece back
-        const destroyedPos = lastEntry.type === 'enPassant' ? lastEntry.enPassantCapturedSquare! : lastEntry.move.end;
-        gameState.board.place(lastEntry.destroyedPiece, destroyedPos);
-    } else if (lastEntry.type === 'castling') {
-        // For castling, move rook back
-        const castlingEntry = lastEntry as CastlingMoveInfo;
-        gameState.board.place(castlingEntry.rookPiece, castlingEntry.rookMove.start);
-        gameState.board.removePiece(castlingEntry.rookMove.end); // Clear rook's end square
-    }
-    gameState.board.removePiece(lastEntry.move.end); // Clear the moving piece's end square
-
-    // Revert hash components (XOR out the new state, XOR in the old state)
-    // This is the core of testing Zobrist reversibility.
-    // Note: This assumes the hash was correctly updated in applyMove.
-    // We are essentially re-applying the XORs in reverse.
-
-    // 1. Revert side to move
-    // This is the simplest part: XORing the side to move key again flips it back.
-    gameState.hash! ^= getSideToMoveNumber(); 
-
-    // 2. Revert en passant target file
-    const enPassantNumbers: bigint[] = getFilesEnPassantNumbers();
-    // If there was an en passant target *before* the move we are undoing,
-    // we need to XOR it back in. The current `gameState.enPassantTargetFile`
-    // holds the *new* state after the move, so we XOR that out first.
-    if (gameState.enPassantTargetFile !== null) {
-        gameState.hash! ^= enPassantNumbers[gameState.enPassantTargetFile];
-    }
-    // Now, set the enPassantTargetFile to what it *was* before the move.
-    // This requires the HistoryEntry to store the previous enPassantTargetFile.
-    // Since your HistoryEntry doesn't store this, we'll make a simplifying assumption
-    // that for tests, if a pawn double push is undone, the en passant file becomes null.
-    // For more complex scenarios, you'd need to extend HistoryEntry.
-    if (lastEntry.type === 'move' && lastEntry.piece.getPiece() === 'pawn' && Math.abs(lastEntry.move.end.y - lastEntry.move.start.y) === 2) {
-        // If the last move was a pawn double push, the en passant target was set.
-        // Undoing it means it should be removed.
-        gameState.enPassantTargetFile = null;
-    } else {
-        // Otherwise, it should revert to whatever it was before this move.
-        // This is a weak point without storing previous enPassantTargetFile in HistoryEntry.
-        // For now, we'll assume the tests are structured such that this simplification works.
-        // A more robust undo would store `prevEnPassantTargetFile` in `HistoryEntry`.
-    }
-    // If the previous state had an en passant file, XOR it back in.
-    // This part is problematic without `prevEnPassantTargetFile` in `HistoryEntry`.
-    // For now, we rely on the overall hash equality check.
-
-    // 3. Revert castling rights
-    if (lastEntry.type === 'castling') {
-        const castlingEntry = lastEntry as CastlingMoveInfo;
-        const castlingColor: ColorType = castlingEntry.castlingDetails.at(0) === 'w' ? 'white' : 'black';
-        const castlingSide: 'kingSide' | 'queenSide' = castlingEntry.castlingDetails.at(1) === 'k' ? 'kingSide' : 'queenSide';
-
-        // Revert the castling right in the gameState object
-        gameState.castlingRights[castlingColor][castlingSide] = true; // Castling rights are usually revoked by move, so undoing restores them
-
-        let castlingRightNumber: number = castlingSide === 'queenSide' ? 1 : 0;
-        castlingRightNumber += castlingColor === 'black' ? 2 : 0;
-
-        // XOR back the castling right key
-        gameState.hash! ^= getCastlingRightsNumbers()[castlingRightNumber];
-
-        // Revert rook's position in hash (rook moved during castling)
-        gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.end); // XOR out new rook pos
-        gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start); // XOR in old rook pos
-    } else {
-        // If a king or rook moved, it revokes castling rights.
-        // To undo this, we need to know if castling rights *were* available before the move.
-        // This again points to the need for more state in HistoryEntry (e.g., `prevCastlingRights`).
-        // For now, we'll assume the initial state has all castling rights for simplicity in undo.
-        // If a test involves revoking rights and then undoing, the `initialGameState` hash comparison will catch it.
-    }
-
-
-    // 4. Revert piece positions
-    const color = lastEntry.piece.getColor();
-    const pieceType = lastEntry.piece.getPiece();
-
-    if (lastEntry.type === 'move' || lastEntry.type === 'castling') {
-        // XOR out new piece position
-        gameState.hash! ^= getPieceNumber(color, pieceType, lastEntry.move.end);
-        // XOR in old piece position
-        gameState.hash! ^= getPieceNumber(color, pieceType, lastEntry.move.start);
-    } else if (lastEntry.type === 'attackMove' || lastEntry.type === 'enPassant') {
-        // XOR out new piece position
-        gameState.hash! ^= getPieceNumber(color, pieceType, lastEntry.move.end);
-        // XOR in old piece position
-        gameState.hash! ^= getPieceNumber(color, pieceType, lastEntry.move.start);
-
-        // XOR in destroyed piece (if any)
-        if (lastEntry.destroyedPiece) {
-            const destroyedPiecePos: Position = lastEntry.type === 'attackMove' ? lastEntry.move.end : lastEntry.enPassantCapturedSquare!;
-            gameState.hash! ^= getPieceNumber(
-                lastEntry.destroyedPiece.getColor(),
-                lastEntry.destroyedPiece.getPiece(),
-                destroyedPiecePos,
-            );
-        }
-    }
-    // Promotion undo is complex as piece type changes. For a full undo, you'd store
-    // the original piece type in the history entry. Here, we'll skip explicit hash
-    // manipulation for promotion undo and rely on the overall hash check if a test
-    // involves promotion.
-}
 
 
 describe('Zobrist Hashing Implementation', () => {
@@ -186,18 +37,7 @@ describe('Zobrist Hashing Implementation', () => {
         // For example, if your initial hash calculation gives 12345678901234567890n
         const tempBoard = new Board();
         ChessEngine.setupBoard(tempBoard); // Initialize pieces on the board
-        const tempGameState: GameState = {
-            player: new HumanPlayer('white'),
-            opponent: new ComputerPlayer('black'),
-            board: tempBoard,
-            moveHistory: [],
-            checked: { whiteKingChecked: false, blackKingChecked: false },
-            enPassantTargetFile: null,
-            castlingRights: {
-                white: { kingSide: true, queenSide: true },
-                black: { kingSide: true, queenSide: true },
-            },
-        };
+        const tempGameState: GameState = ChessEngine['initGame']({player: 'human', opponent: 'human'});
         // This is the actual hash value you'd get from your `initGameStateHash`
         // with your fixed `PSEUDO_RANDOM_NUMBERS`.
         // Run your `npm test` once, if it fails on the first test,
@@ -210,7 +50,7 @@ describe('Zobrist Hashing Implementation', () => {
     // Use Mocha's `beforeEach` hook
     beforeEach(() => {
         // Reset game state before each test to ensure isolation
-        initialGameState = ChessEngine.initGame('human', 'ai');
+        initialGameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
         // Ensure the hash is initialized for each test
         initGameStateHash(initialGameState);
     });
@@ -388,9 +228,9 @@ describe('Zobrist Hashing Implementation', () => {
 
         // Simulate the promotion's effect on hash: XOR out old piece, XOR in new piece
         if (pawnOnA8) {
-            gameStateForPromotion.hash! ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR out pawn
+            gameStateForPromotion.hash ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR out pawn
             pawnOnA8.setPiece('queen'); // Change piece type
-            gameStateForPromotion.hash! ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR in queen
+            gameStateForPromotion.hash ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR in queen
         }
 
         expect(gameStateForPromotion.hash).to.not.equal(originalHash);
@@ -398,9 +238,9 @@ describe('Zobrist Hashing Implementation', () => {
 
         // Undo the promotion (simplified: revert piece type and hash)
         if (pawnOnA8) {
-            gameStateForPromotion.hash! ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR out queen
+            gameStateForPromotion.hash ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR out queen
             pawnOnA8.setPiece('pawn'); // Change piece type back
-            gameStateForPromotion.hash! ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR in pawn
+            gameStateForPromotion.hash ^= getPieceNumber(pawnOnA8.getColor(), pawnOnA8.getPiece(), {x:0, y:7}); // XOR in pawn
         }
         // Undo the move itself
         undoLastMove(gameStateForPromotion);

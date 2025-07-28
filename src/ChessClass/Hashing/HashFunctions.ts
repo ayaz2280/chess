@@ -37,7 +37,7 @@ function initGameStateHash(gameState: GameState, enPassantFile?: number | null):
 
   castlingRightsArr.forEach((castlingRight, id) => {
     if (castlingRight) {
-      gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[id];
+      gameState.hash ^= HASH_CASTLING_RIGHTS_NUMBERS[id];
     }
   });
 

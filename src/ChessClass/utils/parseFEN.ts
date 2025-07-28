@@ -124,6 +124,7 @@ function parseFEN(fen: string): GameState {
     enPassantTargetFile: enPassantTargetFile,
     halfMoveClock: halfMoveClock,
     fullMoveCounter: fullMoveCounter,
+    hash: 0n,
   };
 
   initGameStateHash(gameState, gameState.enPassantTargetFile);

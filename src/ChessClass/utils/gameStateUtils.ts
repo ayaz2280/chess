@@ -30,10 +30,7 @@ function cloneGameState(gameState: GameState): GameState {
     halfMoveClock: gameState.halfMoveClock,
     sideToMove: gameState.sideToMove,
     fullMoveCounter: gameState.fullMoveCounter,
-  }
-
-  if (gameState.hash !== undefined) {
-    newGameState.hash = gameState.hash;
+    hash: gameState.hash,
   }
 
   return newGameState;
@@ -134,7 +131,7 @@ function getPiecePosition(gameState: GameState, piece: Figure): Position | null 
 
 function flipSideToMove(gameState: GameState): void {
   gameState.sideToMove = gameState.sideToMove === 'white' ? 'black' : 'white';
-  gameState.hash! ^= HASH_SIDE_TO_MOVE_NUMBER;
+  gameState.hash ^= HASH_SIDE_TO_MOVE_NUMBER;
 }
 
 function getDestroyedPiece(gameState: GameState, attackerPiece: Figure, move: Move): Figure | null {

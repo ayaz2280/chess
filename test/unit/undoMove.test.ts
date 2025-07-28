@@ -40,32 +40,32 @@ describe('undoLastMove()', () => {
   it('should return the same gamestate after series of moves', () => {
     ChessEngine.applyMoveDebug(gameState, parseMove('c2-c4'));
     tmpHash = calculateHash(gameState);
-    expect(gameState.hash!).to.equal(tmpHash);
+    expect(gameState.hash).to.equal(tmpHash);
     ChessEngine.applyMoveDebug(gameState, parseMove('d7-d5'));
     tmpHash = calculateHash(gameState);
-    expect(gameState.hash!).to.equal(tmpHash);
+    expect(gameState.hash).to.equal(tmpHash);
 
     ChessEngine.applyMoveDebug(gameState, parseMove('g1-f3'));
     tmpHash = calculateHash(gameState);
-    expect(gameState.hash!).to.equal(tmpHash);
+    expect(gameState.hash).to.equal(tmpHash);
 
     ChessEngine.applyMoveDebug(gameState, parseMove('d5-d4'));
     tmpHash = calculateHash(gameState);
-    expect(gameState.hash!).to.equal(tmpHash);
+    expect(gameState.hash).to.equal(tmpHash);
 
     ChessEngine.applyMoveDebug(gameState, parseMove('e2-e4'));
     tmpHash = calculateHash(gameState);
-    expect(gameState.hash!).to.equal(tmpHash);
+    expect(gameState.hash).to.equal(tmpHash);
 
     ChessEngine.applyMoveDebug(gameState, parseMove('d4-e3'));
     tmpHash = calculateHash(gameState);
-    expect(gameState.hash!).to.equal(tmpHash);
+    expect(gameState.hash).to.equal(tmpHash);
 
     for (let i = 0; i < 6; i++) {
       const success = ChessEngine['undoLastMove'](gameState);
       expect(success).to.be.true;
       tmpHash = calculateHash(gameState);
-      expect(gameState.hash!).to.equal(tmpHash);
+      expect(gameState.hash).to.equal(tmpHash);
     }
 
     board.display();

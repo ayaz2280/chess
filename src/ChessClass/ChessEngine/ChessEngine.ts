@@ -45,6 +45,7 @@ export class ChessEngine {
       halfMoveClock: 0,
       sideToMove: sideToMove ?? 'white',
       fullMoveCounter: 1,
+      hash: 0n,
     };
 
     if (boardSetup && boardSetup !== 'emptyBoard') {
@@ -111,20 +112,20 @@ export class ChessEngine {
     // restoring the hash
     switch (lastEntry.type) {
       case 'move': {
-        gameState.hash! ^= pieceOnEndNumber;
-        gameState.hash! ^= pieceOnStartNumber;
+        gameState.hash ^= pieceOnEndNumber;
+        gameState.hash ^= pieceOnStartNumber;
 
         board.move({ start: lastEntry.move.end, end: lastEntry.move.start });
 
         break;
       }
       case 'attackMove': {
-        gameState.hash! ^= pieceOnEndNumber;
-        gameState.hash! ^= pieceOnStartNumber;
+        gameState.hash ^= pieceOnEndNumber;
+        gameState.hash ^= pieceOnStartNumber;
 
         const destroyedPieceNumber: bigint = getPieceNumber(lastEntry.destroyedPiece!.getColor(), lastEntry.destroyedPiece!.getPiece(), lastEntry.move.end);
 
-        gameState.hash! ^= destroyedPieceNumber;
+        gameState.hash ^= destroyedPieceNumber;
 
         board.move({ start: lastEntry.move.end, end: lastEntry.move.start });
         board.place(lastEntry.destroyedPiece!, lastEntry.move.end);
@@ -132,12 +133,12 @@ export class ChessEngine {
       }
 
       case 'enPassant': {
-        gameState.hash! ^= pieceOnEndNumber;
-        gameState.hash! ^= pieceOnStartNumber;
+        gameState.hash ^= pieceOnEndNumber;
+        gameState.hash ^= pieceOnStartNumber;
 
         const destroyedPieceNumber: bigint = getPieceNumber(lastEntry.destroyedPiece!.getColor(), lastEntry.destroyedPiece!.getPiece(), lastEntry.enPassantCapturedSquare!);
 
-        gameState.hash! ^= destroyedPieceNumber;
+        gameState.hash ^= destroyedPieceNumber;
 
         board.move({ start: lastEntry.move.end, end: lastEntry.move.start });
         board.place(lastEntry.destroyedPiece!, lastEntry.enPassantCapturedSquare!);
@@ -154,15 +155,15 @@ export class ChessEngine {
 
         const kingOnStartNumber: bigint = getPieceNumber(kingOnEnd.getColor(), kingOnEnd.getPiece(), lastEntry.move.start);
 
-        gameState.hash! ^= kingOnEndNumber;
-        gameState.hash! ^= kingOnStartNumber;
+        gameState.hash ^= kingOnEndNumber;
+        gameState.hash ^= kingOnStartNumber;
 
         const rookStartPosNumber: bigint = getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start);
 
         const rookEndPosNumber: bigint = getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.end);
 
-        gameState.hash! ^= rookEndPosNumber;
-        gameState.hash! ^= rookStartPosNumber;
+        gameState.hash ^= rookEndPosNumber;
+        gameState.hash ^= rookStartPosNumber;
 
         board.move({ start: lastEntry.move.end, end: lastEntry.move.start });
         board.move({ start: castlingEntry.rookMove.end, end: castlingEntry.rookMove.start });
@@ -181,24 +182,24 @@ export class ChessEngine {
     // restoring en passant file
 
     if (gameState.enPassantTargetFile !== null) {
-      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[gameState.enPassantTargetFile];
+      gameState.hash ^= HASH_EN_PASSANT_FILES_NUMBERS[gameState.enPassantTargetFile];
       gameState.enPassantTargetFile = null;
     }
 
     const restoredEnPassantFile: number | null = getEnPassantFile(gameState);
 
     if (restoredEnPassantFile !== null) {
-      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[restoredEnPassantFile];
+      gameState.hash ^= HASH_EN_PASSANT_FILES_NUMBERS[restoredEnPassantFile];
       gameState.enPassantTargetFile = restoredEnPassantFile;
     }
-    const hashBefore: bigint = gameState.hash!;
+    const hashBefore: bigint = gameState.hash;
     // restoring castling rights
     // firstly make all of the rights false
     let iter = 0;
     for (const color of ['white', 'black'] as ColorType[]) {
       for (const side of ['kingSide', 'queenSide'] as ('kingSide' | 'queenSide')[]) {
         if (gameState.castlingRights[color][side]) {
-          gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[iter];
+          gameState.hash ^= HASH_CASTLING_RIGHTS_NUMBERS[iter];
         }
         iter++;
       }
@@ -210,7 +211,7 @@ export class ChessEngine {
     for (const color of ['white', 'black'] as ColorType[]) {
       for (const side of ['kingSide', 'queenSide'] as ('kingSide' | 'queenSide')[]) {
         if (gameState.castlingRights[color][side]) {
-          gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[iter];
+          gameState.hash ^= HASH_CASTLING_RIGHTS_NUMBERS[iter];
         }
         iter++;
       }
@@ -290,8 +291,8 @@ export class ChessEngine {
     const pawnNumber: bigint = getPieceNumber(piece.getColor(), 'pawn', pos);
     const resultPieceNumber: bigint = getPieceNumber(piece.getColor(), piece.getPiece(), pos);
 
-    gameState.hash! ^= pawnNumber;
-    gameState.hash! ^= resultPieceNumber;
+    gameState.hash ^= pawnNumber;
+    gameState.hash ^= resultPieceNumber;
 
     return true;
   }
@@ -330,8 +331,6 @@ export class ChessEngine {
       //console.log(gameState.moveHistory);
     }
 
-    assert(gameState.hash !== undefined);
-
     // updating hash
 
     // updating en passant target file
@@ -339,7 +338,7 @@ export class ChessEngine {
     const enPassantPrevFile: number | null = gameState.enPassantTargetFile;
 
     if (enPassantPrevFile !== null) {
-      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[enPassantPrevFile];
+      gameState.hash ^= HASH_EN_PASSANT_FILES_NUMBERS[enPassantPrevFile];
     }
 
 
@@ -347,7 +346,7 @@ export class ChessEngine {
     gameState.enPassantTargetFile = getEnPassantFile(gameState);
 
     if (gameState.enPassantTargetFile !== null) {
-      gameState.hash! ^= HASH_EN_PASSANT_FILES_NUMBERS[gameState.enPassantTargetFile]
+      gameState.hash ^= HASH_EN_PASSANT_FILES_NUMBERS[gameState.enPassantTargetFile]
     }
 
     // hash for side to move
@@ -368,37 +367,37 @@ export class ChessEngine {
         let castlingRightNumber: number = castlingSide === 'queenSide' ? 1 : 0;
         castlingRightNumber += castlingColor === 'black' ? 2 : 0;
 
-        gameState.hash! ^= HASH_CASTLING_RIGHTS_NUMBERS[castlingRightNumber];
+        gameState.hash ^= HASH_CASTLING_RIGHTS_NUMBERS[castlingRightNumber];
 
         // xor out init rook pos
-        gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start);
+        gameState.hash ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start);
 
         // xor in new position
-        gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.end);
+        gameState.hash ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.end);
 
         // placing a rook into a new position
         gameState.board.move(castlingEntry.rookMove);
       }
       case 'move': {
         // xor out init pos
-        gameState.hash! ^= getPieceNumber(color, entry.promotionDetails.isPromotion ? 'pawn' : pieceType, move.start);
+        gameState.hash ^= getPieceNumber(color, entry.promotionDetails.isPromotion ? 'pawn' : pieceType, move.start);
 
         // xor in new position
-        gameState.hash! ^= getPieceNumber(color, pieceType, move.end);
+        gameState.hash ^= getPieceNumber(color, pieceType, move.end);
         break;
       }
 
       case 'enPassant':
       case 'attackMove': {
         // xor out init pos 
-        gameState.hash! ^= getPieceNumber(color, entry.promotionDetails.isPromotion ? 'pawn' : pieceType, move.start);
+        gameState.hash ^= getPieceNumber(color, entry.promotionDetails.isPromotion ? 'pawn' : pieceType, move.start);
 
 
         // xor out piece on end pos
         if (entry.destroyedPiece) {
           const destroyedPiecePos: Position = entry.type === 'attackMove' ? move.end : entry.enPassantCapturedSquare!;
 
-          gameState.hash! ^= getPieceNumber(
+          gameState.hash ^= getPieceNumber(
             entry.destroyedPiece.getColor(),
             entry.destroyedPiece.getPiece(),
             destroyedPiecePos,
@@ -406,7 +405,7 @@ export class ChessEngine {
         }
 
         // xor in new position
-        gameState.hash! ^= getPieceNumber(color, pieceType, move.end);
+        gameState.hash ^= getPieceNumber(color, pieceType, move.end);
         break;
       }
     }

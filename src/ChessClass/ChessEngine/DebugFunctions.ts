@@ -93,7 +93,7 @@ function removeFigure(gameState: GameState, pos: Position): boolean {
 
     const enPassantNumbers: bigint[] = getFilesEnPassantNumbers();
     if (enPassantPrevFile !== null) {
-      gameState.hash! ^= enPassantNumbers[enPassantPrevFile];
+      gameState.hash ^= enPassantNumbers[enPassantPrevFile];
     }
 
 
@@ -101,13 +101,13 @@ function removeFigure(gameState: GameState, pos: Position): boolean {
     gameState.enPassantTargetFile = this.getEnPassantFile(gameState);
 
     if (gameState.enPassantTargetFile !== null) {
-      gameState.hash! ^= enPassantNumbers[gameState.enPassantTargetFile]
+      gameState.hash ^= enPassantNumbers[gameState.enPassantTargetFile]
     }
 
     // hash for side to move
     const nextSideToMove: ColorType = this.nextSideToMove(gameState);
     if (nextSideToMove !== entry.player.getColor()) {
-      gameState.hash! ^= getSideToMoveNumber();
+      gameState.hash ^= getSideToMoveNumber();
     }
 
     const [color, pieceType] = [entry.piece.getColor(), entry.piece.getPiece()];
@@ -125,36 +125,36 @@ function removeFigure(gameState: GameState, pos: Position): boolean {
         let castlingRightNumber: number = castlingSide === 'queenSide' ? 1 : 0;
         castlingRightNumber += castlingColor === 'black' ? 2 : 0;
 
-        gameState.hash! ^= getCastlingRightsNumbers()[castlingRightNumber];
+        gameState.hash ^= getCastlingRightsNumbers()[castlingRightNumber];
 
         // xor out init rook pos
-        gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start);
+        gameState.hash ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.start);
 
         // xor in new position
-        gameState.hash! ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.end);
+        gameState.hash ^= getPieceNumber(castlingEntry.rookPiece.getColor(), castlingEntry.rookPiece.getPiece(), castlingEntry.rookMove.end);
 
         // placing a rook into a new position
         gameState.board.move(castlingEntry.rookMove);
       }
       case 'move': {
         // xor out init pos
-        gameState.hash! ^= getPieceNumber(color, pieceType, move.start);
+        gameState.hash ^= getPieceNumber(color, pieceType, move.start);
 
         // xor in new position
-        gameState.hash! ^= getPieceNumber(color, pieceType, move.end);
+        gameState.hash ^= getPieceNumber(color, pieceType, move.end);
         break;
       }
 
       case 'enPassant':
       case 'attackMove': {
         // xor out init pos 
-        gameState.hash! ^= getPieceNumber(color, pieceType, move.start);
+        gameState.hash ^= getPieceNumber(color, pieceType, move.start);
 
         // xor out piece on end pos
         if (entry.destroyedPiece) {
           const destroyedPiecePos: Position = entry.type === 'attackMove' ? move.end : entry.enPassantCapturedSquare!;
 
-          gameState.hash! ^= getPieceNumber(
+          gameState.hash ^= getPieceNumber(
             entry.destroyedPiece.getColor(),
             entry.destroyedPiece.getPiece(),
             destroyedPiecePos,
@@ -162,7 +162,7 @@ function removeFigure(gameState: GameState, pos: Position): boolean {
         }
 
         // xor in new position
-        gameState.hash! ^= getPieceNumber(color, pieceType, move.end);
+        gameState.hash ^= getPieceNumber(color, pieceType, move.end);
         break;
       }
     }
