@@ -1,11 +1,17 @@
 import { assert } from "chai";
 import { Board } from "../src/ChessClass/Board/Board";
 import { ChessEngine } from "../src/ChessClass/ChessEngine/ChessEngine";
-import { posToAlgNotation, styled } from "../src/ChessClass/HelperFunctions";
+
 import { HumanPlayer, ComputerPlayer } from "../src/ChessClass/Player/Player";
-import { ColorType, GameState, HistoryEntry, Position } from "../src/ChessClass/types/ChessTypes";
 import { ChessGrid } from "../src/ChessClass/Board/BoardTypes";
-import { getEnPassantFile, requestCastlingRights } from "../src/ChessClass/GameStateHelperFunctions";
+import { posToAlgNotation } from "../src/ChessClass/Moves/AlgNotation/AlgNotation";
+import { Position } from "../src/ChessClass/Moves/MoveTypes";
+import { ColorType } from "../src/ChessClass/Player/PlayerTypes";
+import { GameState, HistoryEntry } from "../src/ChessClass/types/ChessTypes";
+import { requestCastlingRights, getEnPassantFile } from "../src/ChessClass/utils/evalGameStateUtils";
+import { styled } from "../src/ChessClass/utils/utils";
+
+
 
 const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorType = 'white'): GameState => {
   const board = new Board();

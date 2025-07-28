@@ -5,7 +5,7 @@ import { ComputerPlayer, HumanPlayer, Player } from "../Player/Player";
 import { isSamePos } from "./MoveUtils";
 import { getPositionRelativeTo } from "./MoveUtils";
 
-import { Board } from "../Board/Board";
+import { Board, INIT_SETUP_BOARD } from "../Board/Board";
 import { HASH_SIDE_TO_MOVE_NUMBER } from "../Hashing/HashConstants";
 import { FigureType } from "../Figure/FigureTypes";
 import { ColorType } from "../Player/PlayerTypes";
@@ -81,13 +81,18 @@ function areAllies(p1: Figure, p2: Figure): boolean {
  * @param initPos 
  */
 function containsInitialFigure(gameState: GameState, initPos: Position): boolean {
-  if (gameState.moveHistory.length === 0) {
-    return gameState.board.getPiece(initPos) ? true : false;
+  const pieceOnBoard: Figure | null = gameState.board.getPiece(initPos);
+  const pieceOnInitBoard: Figure | null = INIT_SETUP_BOARD.getPiece(initPos); 
+
+  if (pieceOnBoard === pieceOnInitBoard && pieceOnBoard === null) {
+    return true;
   }
 
-  if (gameState.moveHistory[0].board.getPiece(initPos) === gameState.board.getPiece(initPos))
-    return true;
-  return false;
+  if (pieceOnBoard === null || pieceOnInitBoard === null) {
+    return false;
+  }
+
+  return Figure.isSameFigure(pieceOnBoard, pieceOnInitBoard);
 }
 
 function nextSideToMove(gameState: GameState): ColorType {

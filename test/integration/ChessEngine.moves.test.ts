@@ -1,9 +1,10 @@
 import { expect } from "chai";
-import { ChessEngine } from "../../src/ChessClass/ChessEngine";
+
 import { Figure } from "../../src/ChessClass/Figure/Figure";
-import { parseAlgNotation } from "../../src/ChessClass/HelperFunctions";
 import { GameState } from "../../src/ChessClass/types/ChessTypes";
 import { perft } from "../HelperTestFunctions";
+import { ChessEngine } from "../../src/ChessClass/ChessEngine/ChessEngine";
+import { parseAlgNotation } from "../../src/ChessClass/Moves/AlgNotation/AlgNotation";
 
 describe('perft test', () => {
   let gameState: GameState;

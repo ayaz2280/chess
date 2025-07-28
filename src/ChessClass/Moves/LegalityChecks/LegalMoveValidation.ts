@@ -78,7 +78,7 @@ function isValidCastlingEntry(gameState: GameState, castlingEntry: CastlingMoveI
       }
     }
   } else {
-    for (let i = -1; i >= -3; i--) {
+    for (let i = -1; i >= -2; i--) {
       const posOnPath: Position = getPositionRelativeTo(castlingEntry.move.start, 'forward', { x: i, y: 0 }) as Position;
 
       if (board.isOccupied( posOnPath) || isKingAttackedAfterMove(gameState, castlingEntry.player.getColor(), getMove(kingPos, posOnPath))) {

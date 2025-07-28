@@ -55,6 +55,7 @@ function buildHistoryEntry(gameState: GameState, move: Move, destroyedPiece: Fig
 
       const rook: Figure | null = board.getPiece(rookPos);
 
+
       if (!rook) throw new Error('Rook not found');
 
       const rookMove: Move = getMove(rookPos, getPositionRelativeTo(rookPos, 'forward', { x: isRightRook ? -2 : 3, y: 0 }) as Position);
