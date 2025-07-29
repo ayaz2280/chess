@@ -30,8 +30,19 @@ class Figure {
     this.piece = piece;
   }
 
+  toJSON() {
+    return {
+      color: this.color,
+      piece: this.piece,
+    }
+  }
+
   static clone(piece: Figure): Figure {
     return new Figure(piece.color, piece.piece);
+  }
+
+  static isSameFigure(f1: Figure , f2: Figure) {
+    return f1.color === f2.color && f1.piece === f2.piece;
   }
 }
 

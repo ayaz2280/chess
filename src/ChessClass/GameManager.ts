@@ -1,6 +1,6 @@
 import { Emitter } from "event-emitter";
 import { ChessEngine } from "./ChessEngine/ChessEngine";
-import { styled } from "./HelperFunctions";
+import { styled } from "./utils/utils";
 import { GameState } from "./types/ChessTypes";
 import { PlayerType } from "./Player/PlayerTypes";
 import { EventEmitter } from 'events';

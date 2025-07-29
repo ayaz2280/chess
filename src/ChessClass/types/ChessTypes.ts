@@ -62,7 +62,7 @@ type GameState = {
     whiteKingChecked: boolean,
     blackKingChecked: boolean,
   }
-  hash?: bigint,
+  hash: bigint,
   castlingRights: CastlingRights,
   enPassantTargetFile: number | null,
   halfMoveClock: number,
@@ -76,4 +76,4 @@ type PlayerDetails = {
 
 
 
-export type { Position, PlayerType, GameState, ColorType, Move, FigureType, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails};
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails};

@@ -1,9 +1,17 @@
 import { assert } from "chai";
-import { Board } from "../src/ChessClass/Board";
-import { ChessEngine } from "../src/ChessClass/ChessEngine";
-import { posToAlgNotation, styled } from "../src/ChessClass/HelperFunctions";
-import { HumanPlayer, ComputerPlayer } from "../src/ChessClass/Player";
-import { ChessGrid, ColorType, GameState, HistoryEntry, Position } from "../src/ChessClass/types/ChessTypes";
+import { Board } from "../src/ChessClass/Board/Board";
+import { ChessEngine } from "../src/ChessClass/ChessEngine/ChessEngine";
+
+import { HumanPlayer, ComputerPlayer } from "../src/ChessClass/Player/Player";
+import { ChessGrid } from "../src/ChessClass/Board/BoardTypes";
+import { posToAlgNotation } from "../src/ChessClass/Moves/AlgNotation/AlgNotation";
+import { Position } from "../src/ChessClass/Moves/MoveTypes";
+import { ColorType } from "../src/ChessClass/Player/PlayerTypes";
+import { GameState, HistoryEntry } from "../src/ChessClass/types/ChessTypes";
+import { requestCastlingRights, getEnPassantFile } from "../src/ChessClass/utils/evalGameStateUtils";
+import { styled } from "../src/ChessClass/utils/utils";
+
+
 
 const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorType = 'white'): GameState => {
   const board = new Board();
@@ -37,9 +45,10 @@ const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorTyp
     halfMoveClock: 0,
     sideToMove: currentPlayerColor,
     fullMoveCounter: 1,
+    hash: 0n,
   };
-  gameState.castlingRights = ChessEngine['requestCastlingRights'](gameState);
-  gameState.enPassantTargetFile = ChessEngine['getEnPassantFile'](gameState);
+  gameState.castlingRights = requestCastlingRights(gameState);
+  gameState.enPassantTargetFile = getEnPassantFile(gameState);
 
   return gameState;
 };
@@ -55,30 +64,4 @@ const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorTyp
   })
 } 
 
-function perft(gameState: GameState, depth: number): number {
-  assert(Number.isInteger(depth));
-
-  if (depth === 0) {
-    return 0;
-  }
-
-  let movesCount: number = 0;
-
-  const figPositions: Position[] = ChessEngine['findFigures'](gameState, 'all', 'both');
-
-  figPositions.forEach(pos => {
-    const entries: HistoryEntry[] = ChessEngine['getLegalMoves'](gameState, pos);
-
-    movesCount += entries.length;
-
-    entries.forEach(entry => {
-      ChessEngine['applyMove'](gameState, entry);
-      movesCount += perft(gameState, depth-1);
-      ChessEngine['undoLastMove'](gameState);
-    })
-  });
-
-  return movesCount;
-}
-
-export {perft, createTestGameState, printEntries};
+export {createTestGameState, printEntries};

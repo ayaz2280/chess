@@ -7,4 +7,6 @@ export type Move = {
   start: Position;
   end: Position;
 };
+
+
 export type Direction = 'forward' | 'backward';
