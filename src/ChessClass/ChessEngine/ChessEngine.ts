@@ -17,12 +17,14 @@ import { flushAllCaches, LEGAL_MOVES_CACHE } from "../Cache/Cache";
 import { getPieceNumber, HASH_CASTLING_RIGHTS_NUMBERS, HASH_EN_PASSANT_FILES_NUMBERS } from "../Hashing/HashConstants";
 import { initGameStateHash } from "../Hashing/HashFunctions";
 import { requestCastlingRights, getEnPassantFile } from "../utils/evalGameStateUtils";
-import { moveToAlgNotation, posToAlgNotation } from "../Moves/AlgNotation/AlgNotation";
+import { moveToAlgNotation, parseAlgNotation, parseMove, posToAlgNotation } from "../Moves/AlgNotation/AlgNotation";
 import { saveGameStateToJson } from "../utils/jsonUtils";
+import { isSameMove } from "../utils/MoveUtils";
 
 
 export class ChessEngine {
-
+  static applyHits: number = 0;
+  static undoHits: number = 0;
   static initGame(playerDetails: PlayerDetails, boardSetup?: ChessGrid | 'emptyBoard', sideToMove?: ColorType): GameState {
     const gameState: GameState = {
       player: playerDetails.player === 'human' ? new HumanPlayer('white') : new ComputerPlayer('white'),
@@ -66,11 +68,19 @@ export class ChessEngine {
   }
 
   
-
+  // 3069 HIT
   static undoLastMove(gameState: GameState): boolean {
     const history: HistoryEntry[] = gameState.moveHistory;
+    this.undoHits++;
 
     if (history.length === 0) return false;
+
+    // DEBUG
+    const BLACK_PAWN_A5: Figure | null = gameState.board.getPiece(parseAlgNotation('a5'));
+    if (this.applyHits >= 3048 && BLACK_PAWN_A5 === null) {
+      // console.log(this.undoHits + ' undo');
+    }
+    //
 
     const nextNextSideToMove: ColorType = nextSideToMove(gameState);
 
@@ -91,12 +101,15 @@ export class ChessEngine {
     // piece on end/start numbers
     const pieceOnEnd: Figure | null = board.getPiece(lastEntry.move.end);
 
+    
     if (!pieceOnEnd) {
+      // console.log(ChessEngine.applyHits);
       board.display();
       console.log(lastEntry);
       saveGameStateToJson(gameState);
       throw new Error(`Couldn't find a piece on square ${posToAlgNotation(lastEntry.move.end)} (x: ${lastEntry.move.end.x}, y: ${lastEntry.move.end.y})`)
     }
+      
 
     const pieceOnEndNumber: bigint = getPieceNumber(
       pieceOnEnd.getColor(),
@@ -312,10 +325,17 @@ export class ChessEngine {
   /**
    * Helper Methods
    */
-
+  // 3048 HITS
   public static applyMove(gameState: GameState, entry: HistoryEntry): void {
     gameState.board.move(entry.move);
     const board: Board = gameState.board;
+
+    // DEBUG
+    ChessEngine.applyHits++;
+    if (isSameMove(entry.move, parseMove('b4-a5'))) {
+      // console.log(`${this.applyHits} apply`);
+    }
+    //
 
     const p: Figure = board.getPiece(entry.move.end) as Figure;
 

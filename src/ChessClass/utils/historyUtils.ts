@@ -1,15 +1,19 @@
 import { Board } from "../Board/Board";
 import { Figure } from "../Figure/Figure";
-import { parseAlgNotation } from "../Moves/AlgNotation/AlgNotation";
+import { parseAlgNotation, parseMove } from "../Moves/AlgNotation/AlgNotation";
 import { Player } from "../Player/Player";
 import { ColorType } from "../Player/PlayerTypes";
 import { ActionType, CastlingDetails, GameState, HistoryEntry, Move, Position, PromotionDetails } from "../types/ChessTypes";
 import { getDirection, getPlayer } from "./gameStateUtils";
-import { getMoveOffset, getMove, getPositionRelativeTo } from "./MoveUtils";
+import { getMoveOffset, getMove, getPositionRelativeTo, isSameMove } from "./MoveUtils";
 
 function buildHistoryEntry(gameState: GameState, move: Move, destroyedPiece: Figure | null, actionType: ActionType, promotionDetails: PromotionDetails): HistoryEntry | null {
     const piece: Figure | null = gameState.board.getPiece(move.start);
-
+    // DEBUG
+    if (isSameMove(move, parseMove('b4-a5'))) {
+      //console.log('hey!');
+    }
+    //
 
     if (!piece) return null;
 

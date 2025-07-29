@@ -21,6 +21,7 @@ function perft(gameState: GameState, depth: number): number {
     entries.forEach(entry => {
       ChessEngine.applyMove(gameState, entry);
       nodes += perft(gameState, depth-1);
+      
       ChessEngine.undoLastMove(gameState);
     })
   });

@@ -115,14 +115,14 @@ function getPawnMoves(gameState: GameState, pos: Position, types?: ActionType[])
           const figureTypes: (Exclude<FigureType, 'king' | 'pawn'>)[] = ['bishop', 'knight', 'queen', 'rook'];
 
           figureTypes.forEach((figType) => {
-            entry = buildHistoryEntry(gameState, move, null, 'move', { isPromotion: true, promotedTo: figType });
+            entry = buildHistoryEntry(gameState, move, board.getPiece(leftDiagonal), 'attackMove', { isPromotion: true, promotedTo: figType });
 
             if (entry) {
               moves.push(entry);
             }
           });
         } else {
-          entry = buildHistoryEntry(gameState, move, null, 'move', { isPromotion: false });
+          entry = buildHistoryEntry(gameState, move, board.getPiece(leftDiagonal), 'attackMove', { isPromotion: false });
 
           if (entry) {
             moves.push(entry);
