@@ -64,30 +64,4 @@ const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorTyp
   })
 } 
 
-function perft(gameState: GameState, depth: number): number {
-  assert(Number.isInteger(depth));
-
-  if (depth === 0) {
-    return 0;
-  }
-
-  let movesCount: number = 0;
-
-  const figPositions: Position[] = ChessEngine['findFigures'](gameState, 'all', 'both');
-
-  figPositions.forEach(pos => {
-    const entries: HistoryEntry[] = ChessEngine['getLegalMoves'](gameState, pos);
-
-    movesCount += entries.length;
-
-    entries.forEach(entry => {
-      ChessEngine['applyMove'](gameState, entry);
-      movesCount += perft(gameState, depth-1);
-      ChessEngine['undoLastMove'](gameState);
-    })
-  });
-
-  return movesCount;
-}
-
-export {perft, createTestGameState, printEntries};
+export {createTestGameState, printEntries};

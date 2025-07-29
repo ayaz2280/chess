@@ -17,6 +17,13 @@ abstract class Player {
     this.color = color;
   }
 
+  toJSON() {
+    return {
+      playerType: this.playerType,
+      color: this.color,
+    }
+  }
+
   abstract suggestMove(): Promise<Move> | null;
 }
 

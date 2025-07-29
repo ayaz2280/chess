@@ -153,6 +153,12 @@ class Board {
 
     return found;
   }
+
+  toJSON() {
+    return {
+      grid: this.grid,
+    }
+  }
 }
 
 export function getInitialBoard(): Board {

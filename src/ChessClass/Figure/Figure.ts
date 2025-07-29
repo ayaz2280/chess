@@ -30,6 +30,13 @@ class Figure {
     this.piece = piece;
   }
 
+  toJSON() {
+    return {
+      color: this.color,
+      piece: this.piece,
+    }
+  }
+
   static clone(piece: Figure): Figure {
     return new Figure(piece.color, piece.piece);
   }

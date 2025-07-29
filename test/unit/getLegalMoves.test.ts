@@ -16,11 +16,13 @@ describe('getLegalMoves', () => {
   let entries: HistoryEntry[];
 
   describe('pawn moves', () => {
+    
     beforeEach(() => {
-      gameState = createTestGameState();
+      gameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
       board = gameState.board;
       entries = gameState.moveHistory;
     });
+    
 
     it('should return 2 legal moves for white pawn', () => {
       const moves: HistoryEntry[] = ChessEngine['getLegalMoves'](gameState, parseAlgNotation('a2'));
@@ -49,6 +51,7 @@ describe('getLegalMoves', () => {
 
       expect(moves.map(e => e.move)).to.have.deep.members(expectedMoves);
     });
+    
   });
   
   describe('king moves', () => {
@@ -60,7 +63,7 @@ describe('getLegalMoves', () => {
       board.place(new Figure('white', 'rook'), parseAlgNotation('a1'));
       board.place(new Figure('black', 'king'), parseAlgNotation('e8'));
       
-      gameState = createTestGameState(board.grid, 'white');
+      gameState = ChessEngine.initGame({player: 'human', opponent: 'human'}, board.grid, 'white');
       board = gameState.board;
     });
 

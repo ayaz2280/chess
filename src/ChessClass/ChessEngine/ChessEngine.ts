@@ -17,6 +17,8 @@ import { flushAllCaches, LEGAL_MOVES_CACHE } from "../Cache/Cache";
 import { getPieceNumber, HASH_CASTLING_RIGHTS_NUMBERS, HASH_EN_PASSANT_FILES_NUMBERS } from "../Hashing/HashConstants";
 import { initGameStateHash } from "../Hashing/HashFunctions";
 import { requestCastlingRights, getEnPassantFile } from "../utils/evalGameStateUtils";
+import { moveToAlgNotation, posToAlgNotation } from "../Moves/AlgNotation/AlgNotation";
+import { saveGameStateToJson } from "../utils/jsonUtils";
 
 
 export class ChessEngine {
@@ -87,7 +89,14 @@ export class ChessEngine {
     gameState.fullMoveCounter = lastEntry.prevDetails.prevFullMoveCounter;
 
     // piece on end/start numbers
-    const pieceOnEnd: Figure = board.getPiece(lastEntry.move.end) as Figure;
+    const pieceOnEnd: Figure | null = board.getPiece(lastEntry.move.end);
+
+    if (!pieceOnEnd) {
+      board.display();
+      console.log(lastEntry);
+      saveGameStateToJson(gameState);
+      throw new Error(`Couldn't find a piece on square ${posToAlgNotation(lastEntry.move.end)} (x: ${lastEntry.move.end.x}, y: ${lastEntry.move.end.y})`)
+    }
 
     const pieceOnEndNumber: bigint = getPieceNumber(
       pieceOnEnd.getColor(),

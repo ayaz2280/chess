@@ -2,28 +2,32 @@ import { expect } from "chai";
 
 import { Figure } from "../../src/ChessClass/Figure/Figure";
 import { GameState } from "../../src/ChessClass/types/ChessTypes";
-import { perft } from "../HelperTestFunctions";
+
 import { ChessEngine } from "../../src/ChessClass/ChessEngine/ChessEngine";
 import { parseAlgNotation } from "../../src/ChessClass/Moves/AlgNotation/AlgNotation";
+import { placeFigure } from "../../src/ChessClass/ChessEngine/DebugFunctions";
+import { perft } from "../../src/ChessClass/ChessEngine/perft";
+
+const NODE_COUNT_INIT_POS: number[] = [1,20,400,8902];
+
+function test(gameState: GameState, nodeCounts: number[]): void {
+  nodeCounts.forEach((nodeCount, depth) => {
+    it(`should generate ${nodeCount} nodes on depth ${depth}`, () => {
+      const movesCount: number = perft(gameState, depth);
+      expect(movesCount).to.equal(nodeCount);
+    })
+  })
+}
 
 describe('perft test', () => {
   let gameState: GameState;
 
-  beforeEach(() => {
-    gameState = ChessEngine['initGame']({player: 'human', opponent: 'human'}, 'emptyBoard');
+  before(() => {
+    gameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
   });
-
-  describe('depth 1', () => {
-    it('should generate 1 legal move for pawn on a5', () => {
-      const piece: Figure = new Figure('white','pawn');
-      const success: boolean = ChessEngine['placeFigure'](gameState, parseAlgNotation('a5'), piece);
-      expect(success).to.be.true;
-
-      const expectedMovesCount: number = 1;
-      const movesCount: number = perft(gameState, 1);
-      console.log(movesCount);
-
-      expect(movesCount).to.equal(expectedMovesCount);
-    });
+    
+  describe('initial position', () => {
+    gameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
+    test(gameState, NODE_COUNT_INIT_POS);
   });
 });
