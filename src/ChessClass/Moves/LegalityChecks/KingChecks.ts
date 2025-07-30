@@ -7,6 +7,14 @@ import { isSquareAttackedBy } from "../../utils/LegalityCheckUtils";
 import { getMove } from "../../utils/MoveUtils";
 import { simulateMove } from "../MoveSimulation/SimulateMove";
 
+function updateChecks(gameState: GameState): void {
+  const sideToMove: ColorType = nextSideToMove(gameState);
+
+  gameState.checked.blackKingChecked = false;
+  gameState.checked.whiteKingChecked = false;
+
+  gameState.checked[`${sideToMove}KingChecked`] = isKingChecked(gameState, sideToMove);
+}
 /**
  * Checks if *isKingAttacked* if *side* will not make any move
  */
@@ -76,4 +84,4 @@ function isKingAttackedAfterMove(gameState: GameState, color: ColorType, move: M
   return isKingAttacked(newGameState, color);
 }
 
-export { isKingChecked, isKingAttackedAfterMove };
+export { isKingChecked, isKingAttackedAfterMove, updateChecks };

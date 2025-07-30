@@ -42,6 +42,7 @@ function buildHistoryEntry(gameState: GameState, move: Move, destroyedPiece: Fig
             ? gameState.halfMoveClock
             : 0,
         prevFullMoveCounter: gameState.fullMoveCounter,
+        prevChecked: structuredClone(gameState.checked),
       },
       promotionDetails: { ...promotionDetails },
     }

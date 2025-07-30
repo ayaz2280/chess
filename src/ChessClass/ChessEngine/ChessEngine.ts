@@ -20,6 +20,7 @@ import { requestCastlingRights, getEnPassantFile } from "../utils/evalGameStateU
 import { moveToAlgNotation, parseAlgNotation, parseMove, posToAlgNotation } from "../Moves/AlgNotation/AlgNotation";
 import { saveGameStateToJson } from "../utils/jsonUtils";
 import { isSameMove } from "../utils/MoveUtils";
+import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
 
 
 export class ChessEngine {
@@ -61,6 +62,8 @@ export class ChessEngine {
     gameState.castlingRights = requestCastlingRights(gameState);
 
     initGameStateHash(gameState);
+
+    updateChecks(gameState);
 
     flushAllCaches();
 
@@ -239,7 +242,8 @@ export class ChessEngine {
       }
     }
 
-
+    // restoring kings checked
+    gameState.checked = lastEntry.prevDetails.prevChecked;
 
     return true;
   }
@@ -331,10 +335,12 @@ export class ChessEngine {
     const board: Board = gameState.board;
 
     // DEBUG
+    /*
     ChessEngine.applyHits++;
     if (isSameMove(entry.move, parseMove('b4-a5'))) {
       // console.log(`${this.applyHits} apply`);
     }
+      */
     //
 
     const p: Figure = board.getPiece(entry.move.end) as Figure;
@@ -445,6 +451,8 @@ export class ChessEngine {
     } else {
       gameState.halfMoveClock = 0;
     }
+    updateChecks(gameState);
+
     flushAllCaches();
 
   }

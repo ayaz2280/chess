@@ -10,6 +10,7 @@ type ActionType = 'move' | 'attackMove' | 'checkmate' | 'stalemate' | 'castling'
 type PreviousDetails = {
   prevHalfMoveClock: number,
   prevFullMoveCounter: number,
+  prevChecked: KingsChecked,
 }
 
 type PromotionDetails = {
@@ -52,16 +53,18 @@ type CastlingRights = {
 
 type HistoryEntry = BaseMoveInfo | CastlingMoveInfo;
 
+type KingsChecked = {
+  whiteKingChecked: boolean,
+  blackKingChecked: boolean,
+}
+
 type GameState = {
   player: Player;
   opponent: Player;
   board: Board;
   moveHistory: HistoryEntry[];
   sideToMove: ColorType,
-  checked: {
-    whiteKingChecked: boolean,
-    blackKingChecked: boolean,
-  }
+  checked: KingsChecked,
   hash: bigint,
   castlingRights: CastlingRights,
   enPassantTargetFile: number | null,
@@ -76,4 +79,4 @@ type PlayerDetails = {
 
 
 
-export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails};
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked};
