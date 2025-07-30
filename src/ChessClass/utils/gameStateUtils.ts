@@ -1,6 +1,6 @@
 import { Direction, Move, Position } from "../Moves/MoveTypes";
 import { Figure } from "../Figure/Figure";
-import { CheckInfo, GameState, HistoryEntry } from "../types/ChessTypes";
+import { CheckInfo, GameState, HistoryEntry, KingCheckStatus, StatusCheckInfo } from "../types/ChessTypes";
 import { ComputerPlayer, HumanPlayer, Player } from "../Player/Player";
 import { isSamePos } from "./MoveUtils";
 import { getPositionRelativeTo } from "./MoveUtils";
@@ -36,10 +36,34 @@ function cloneGameState(gameState: GameState): GameState {
   return newGameState;
 }
 
-function getCurrentKingCheckStatus(gameState: GameState): CheckInfo {
+function getCurrentKingCheckStatus(gameState: GameState): StatusCheckInfo {
   const sideToMove: ColorType = gameState.sideToMove;
 
-  return gameState.checked[`${sideToMove}KingChecked`];
+  const statusCheckInfo: StatusCheckInfo = {
+    status: 'NOT_CHECKED',
+    checkingPieces: gameState.checked[`${sideToMove}KingChecked`].checkingPieces,
+  }
+
+  switch (statusCheckInfo.checkingPieces.length) {
+    case 0: {
+      statusCheckInfo.status = 'NOT_CHECKED';
+      break;
+    }
+    case 1: {
+      statusCheckInfo.status = 'SINGLE_CHECK';
+      break;
+    }
+    case 2: {
+      statusCheckInfo.status = 'DOUBLE_CHECK';
+      break;
+    }
+
+    default: {
+      throw new Error(`King's checked by more than 2 pieces: ${statusCheckInfo.checkingPieces}`);
+    }
+  }
+
+  return statusCheckInfo;
 }
 
 function getDirection(gameState: GameState, piece: Figure): Direction {

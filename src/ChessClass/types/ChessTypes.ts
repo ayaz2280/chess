@@ -62,6 +62,13 @@ type CheckInfo = {
   checkingPieces: CheckingPieceDetail[],
 }
 
+type KingCheckStatus = 'NOT_CHECKED' | 'SINGLE_CHECK' | 'DOUBLE_CHECK';
+
+type StatusCheckInfo = {
+  status: KingCheckStatus,
+  checkingPieces: CheckingPieceDetail[],
+}
+
 type KingsChecked = {
   whiteKingChecked: CheckInfo,
   blackKingChecked: CheckInfo,
@@ -88,4 +95,4 @@ type PlayerDetails = {
 
 
 
-export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail};
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail, StatusCheckInfo, KingCheckStatus};

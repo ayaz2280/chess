@@ -6,6 +6,7 @@ import { parseAlgNotation, parseMove } from "../../src/ChessClass/Moves/AlgNotat
 import { isSameMove } from "../../src/ChessClass/utils/MoveUtils";
 import { assert, expect } from "chai";
 import { applyMoveDebug } from "../../src/ChessClass/ChessEngine/DebugFunctions";
+import { getCurrentKingCheckStatus } from "../../src/ChessClass/utils/gameStateUtils";
 
 describe('updateChecks', () => {
   let gameState: GameState;
@@ -45,6 +46,8 @@ describe('updateChecks', () => {
         pos: rookPos, 
       }
     ]
+
+    console.log(getCurrentKingCheckStatus(gameState));
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
   });

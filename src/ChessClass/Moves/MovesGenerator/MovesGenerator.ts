@@ -4,7 +4,7 @@ import { PSEUDO_LEGAL_MOVES_CACHE } from "../../Cache/Cache";
 import { Figure } from "../../Figure/Figure";
 
 import { getUniqueArray } from "../../utils/utils";
-import { ActionType, GameState, HistoryEntry, Position } from "../../types/ChessTypes";
+import { ActionType, GameState, HistoryEntry, Position, StatusCheckInfo } from "../../types/ChessTypes";
 import { getBishopMoves } from "./FigureMovesGenerators/BishopMovesGenerator";
 import { getKingMoves } from "./FigureMovesGenerators/KingMovesGenerator";
 import { getKnightMoves } from "./FigureMovesGenerators/KnightMovesGenerator";
@@ -12,6 +12,7 @@ import { getPawnMoves } from "./FigureMovesGenerators/PawnMovesGenerator";
 import { getQueenMoves } from "./FigureMovesGenerators/QueenMovesGenerator";
 import { getRookMoves } from "./FigureMovesGenerators/RookMovesGenerator";
 import { FigureType } from "../../Figure/FigureTypes";
+import { getCurrentKingCheckStatus } from "../../utils/gameStateUtils";
 
 type PseudoLegalMoveGenerator = (gameState: GameState, pos: Position, types?: ActionType[]) => HistoryEntry[];
 
@@ -36,6 +37,8 @@ function getMoves(gameState: GameState, position: Position, types?: ActionType[]
 
   if (!gameState.board.grid[position.y][position.x]) return pseudoLegalMoves;
 
+  const kingCheckStatus: StatusCheckInfo = getCurrentKingCheckStatus(gameState);
+
   const typesKey: string = uniqueTypes ? uniqueTypes.join('_') : 'all';
 
   const key: string = `${gameState.hash}:${position.x}${position.y}:${typesKey}`;
@@ -51,6 +54,9 @@ function getMoves(gameState: GameState, position: Position, types?: ActionType[]
 
   const pieceType: FigureType = piece.getPiece();
 
+  if (kingCheckStatus.status === 'DOUBLE_CHECK' && pieceType !== 'king') {
+    return [];
+  }
 
   pseudoLegalMoves.push(...getMovesFor(gameState, position, pieceType, types));
 
