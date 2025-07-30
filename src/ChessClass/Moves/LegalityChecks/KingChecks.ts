@@ -1,6 +1,6 @@
 
 import { ColorType } from "../../Player/PlayerTypes";
-import { GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
+import { CheckInfo, GameState, HistoryEntry, Move, Position } from "../../types/ChessTypes";
 import { cloneGameState, nextSideToMove } from "../../utils/gameStateUtils";
 import { buildHistoryEntry } from "../../utils/historyUtils";
 import { isSquareAttackedBy } from "../../utils/LegalityCheckUtils";
@@ -8,18 +8,20 @@ import { getMove } from "../../utils/MoveUtils";
 import { simulateMove } from "../MoveSimulation/SimulateMove";
 
 function updateChecks(gameState: GameState): void {
-  const sideToMove: ColorType = nextSideToMove(gameState);
+  const sideToMove: ColorType = gameState.sideToMove;
 
-  gameState.checked.blackKingChecked = false;
-  gameState.checked.whiteKingChecked = false;
+  gameState.checked.blackKingChecked.checkingPieces = [];
+  gameState.checked.whiteKingChecked.checkingPieces = [];
 
-  gameState.checked[`${sideToMove}KingChecked`] = isKingChecked(gameState, sideToMove);
+  const checkInfo: CheckInfo = gameState.checked[`${sideToMove}KingChecked`];
+
+  isKingChecked(gameState, sideToMove, checkInfo);
 }
 /**
  * Checks if *isKingAttacked* if *side* will not make any move
  */
-function isKingChecked(gameState: GameState, side: ColorType): boolean {
-  const turn: ColorType = nextSideToMove(gameState);
+function isKingChecked(gameState: GameState, side: ColorType, checkInfo?: CheckInfo): boolean {
+  const turn: ColorType = gameState.sideToMove;
 
   if (turn !== side) {
     throw new Error(`It's not ${side}'s turn to make a move!`);
@@ -39,7 +41,7 @@ function isKingChecked(gameState: GameState, side: ColorType): boolean {
     ) as HistoryEntry
   );
 
-  return isKingAttacked(newGameState, side);
+  return isKingAttacked(newGameState, side, checkInfo);
 }
 
 /*
@@ -47,7 +49,7 @@ function isKingChecked(gameState: GameState, side: ColorType): boolean {
 
   The king is considered under attack, if its square is immediately captured on the next opponent's move, and it's opponent's turn to make a move.
 */
-function isKingAttacked(gameState: GameState, color: ColorType): boolean {
+function isKingAttacked(gameState: GameState, color: ColorType, checkInfo?: CheckInfo): boolean {
   const sideToMove: ColorType = nextSideToMove(gameState);
   const opponentColor: ColorType = color === 'white' ? 'black' : 'white';
 
@@ -64,7 +66,7 @@ function isKingAttacked(gameState: GameState, color: ColorType): boolean {
   const kingPos: Position = figPositions[0];
 
 
-  return isSquareAttackedBy(gameState, kingPos, opponentColor);
+  return isSquareAttackedBy(gameState, kingPos, opponentColor, checkInfo);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { Board } from "../../src/ChessClass/Board/Board";
-import { GameState, HistoryEntry, KingsChecked } from "../../src/ChessClass/types/ChessTypes";
+import { GameState, HistoryEntry, KingsChecked, Position } from "../../src/ChessClass/types/ChessTypes";
 import { ChessEngine } from "../../src/ChessClass/ChessEngine/ChessEngine";
 import { Figure } from "../../src/ChessClass/Figure/Figure";
 import { parseAlgNotation, parseMove } from "../../src/ChessClass/Moves/AlgNotation/AlgNotation";
@@ -10,6 +10,7 @@ import { applyMoveDebug } from "../../src/ChessClass/ChessEngine/DebugFunctions"
 describe('updateChecks', () => {
   let gameState: GameState;
   let board: Board;
+  let expectedChecked: KingsChecked;
 
   beforeEach(() => {
     board = new Board();
@@ -22,6 +23,11 @@ describe('updateChecks', () => {
 
     gameState = ChessEngine.initGame({player: 'human', opponent: 'human'}, board.grid);
     board = gameState.board;
+
+    expectedChecked = {
+      whiteKingChecked: {checkingPieces: []},
+      blackKingChecked: {checkingPieces: []},
+    }
   });
 
   it('black king should be checked after white rook move (a1-a8)', () => {
@@ -31,10 +37,14 @@ describe('updateChecks', () => {
 
     ChessEngine.applyMove(gameState, rookMove!);
 
-    const expectedChecked: KingsChecked = {
-      whiteKingChecked: false,
-      blackKingChecked: true,
-    }
+    const rookPos: Position = parseAlgNotation('a8');
+
+    expectedChecked.blackKingChecked.checkingPieces = [
+      {
+        piece: board.getPiece(rookPos) as Figure,
+        pos: rookPos, 
+      }
+    ]
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
   });
@@ -49,11 +59,6 @@ describe('updateChecks', () => {
     assert(blackKingMove);
 
     ChessEngine.applyMove(gameState, blackKingMove);
-
-    const expectedChecked: KingsChecked = {
-      whiteKingChecked: false,
-      blackKingChecked: false,
-    }
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
   });
@@ -70,20 +75,33 @@ describe('updateChecks', () => {
     gameState = ChessEngine.initGame({player: 'human', opponent: 'human'}, board.grid);
     board = gameState.board;
 
+    const whiteRookPiecePos: Position = parseAlgNotation('d7');
+
     let success: boolean;
-    const expectedChecked: KingsChecked = {
-      whiteKingChecked: false,
-      blackKingChecked: true,
-    }
+    
 
     success = applyMoveDebug(gameState, parseMove('a7-d7'));
     assert(success);
+
+    expectedChecked = {
+      whiteKingChecked: {checkingPieces: []},
+      blackKingChecked: {checkingPieces: [
+        {
+          piece: board.getPiece(whiteRookPiecePos) as Figure,
+          pos: whiteRookPiecePos,
+        }
+      ]},
+    }
+
     expect(gameState.checked).to.deep.equal(expectedChecked);
     
-    expectedChecked.blackKingChecked = false;
-    expectedChecked.whiteKingChecked = true;
+    
     applyMoveDebug(gameState, parseMove('d8-d7'));
-
+    expectedChecked.blackKingChecked.checkingPieces = [];
+    expectedChecked.whiteKingChecked.checkingPieces = [{
+      piece: board.getPiece(whiteRookPiecePos) as Figure,
+      pos: whiteRookPiecePos,
+    }];
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
   });
@@ -94,15 +112,17 @@ describe('updateChecks', () => {
     board.place(new Figure('white', 'king'), parseAlgNotation('e1'));
     board.place(new Figure('black', 'king'), parseAlgNotation('e8'));
     board.place(new Figure('black', 'rook'), parseAlgNotation('e7'));
+
+    const rookPos: Position = parseAlgNotation('e7');
     
 
     gameState = ChessEngine.initGame({player: 'human', opponent: 'human'}, board.grid);
     board = gameState.board;
 
-    const expectedChecked: KingsChecked = {
-      whiteKingChecked: true,
-      blackKingChecked: false,
-    }
+    expectedChecked.whiteKingChecked.checkingPieces.push({
+      piece: board.getPiece(rookPos)!,
+      pos: rookPos,
+    });
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
   });
@@ -112,10 +132,12 @@ describe('updateChecks', () => {
 
     assert(success);
 
-    const expectedChecked: KingsChecked = {
-      whiteKingChecked: false,
-      blackKingChecked: true,
-    }
+    const rookPos: Position = parseAlgNotation('a8');
+
+    expectedChecked.blackKingChecked.checkingPieces = [{
+      piece: board.getPiece(rookPos)!,
+      pos: rookPos,
+    }]
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
 
@@ -123,9 +145,32 @@ describe('updateChecks', () => {
 
     assert(success);
 
-    expectedChecked.blackKingChecked = false;
-    expectedChecked.whiteKingChecked = false;
+    expectedChecked.blackKingChecked.checkingPieces = [];
+    expectedChecked.whiteKingChecked.checkingPieces = [];
 
     expect(gameState.checked).to.deep.equal(expectedChecked);
+  });
+
+  it('should keep info about double check pieces correctly', () => {
+    board.place(new Figure('white', 'knight'), parseAlgNotation('f6'));
+    board.move(parseMove('a1-a8'));
+
+    gameState = ChessEngine.initGame({player: 'human', opponent: 'human'}, board.grid, 'black');
+
+    board = gameState.board;
+
+    expectedChecked.blackKingChecked.checkingPieces = [
+      {
+        pos: parseAlgNotation('a8'),
+        piece: board.getPiece(parseAlgNotation('a8'))!,
+      }, {
+        pos: parseAlgNotation('f6'),
+        piece: board.getPiece(parseAlgNotation('f6'))!,
+      }
+    ];
+
+    expect(gameState.checked.whiteKingChecked.checkingPieces).to.be.empty;
+    expect(gameState.checked.blackKingChecked.checkingPieces).to.have.lengthOf(2);
+    expect(gameState.checked.blackKingChecked.checkingPieces).to.have.deep.members(expectedChecked.blackKingChecked.checkingPieces);
   });
 });

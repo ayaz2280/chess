@@ -33,8 +33,8 @@ export class ChessEngine {
       board: new Board(),
       moveHistory: [],
       checked: {
-        whiteKingChecked: false,
-        blackKingChecked: false,
+        whiteKingChecked: {checkingPieces: []},
+        blackKingChecked: {checkingPieces: []},
       },
       enPassantTargetFile: null,
       castlingRights: {

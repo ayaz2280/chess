@@ -53,9 +53,18 @@ type CastlingRights = {
 
 type HistoryEntry = BaseMoveInfo | CastlingMoveInfo;
 
+type CheckingPieceDetail = {
+  piece: Figure,
+  pos: Position,
+}
+
+type CheckInfo = {
+  checkingPieces: CheckingPieceDetail[],
+}
+
 type KingsChecked = {
-  whiteKingChecked: boolean,
-  blackKingChecked: boolean,
+  whiteKingChecked: CheckInfo,
+  blackKingChecked: CheckInfo,
 }
 
 type GameState = {
@@ -79,4 +88,4 @@ type PlayerDetails = {
 
 
 
-export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked};
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail};

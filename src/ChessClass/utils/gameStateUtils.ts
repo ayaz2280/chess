@@ -1,6 +1,6 @@
 import { Direction, Move, Position } from "../Moves/MoveTypes";
 import { Figure } from "../Figure/Figure";
-import { GameState, HistoryEntry } from "../types/ChessTypes";
+import { CheckInfo, GameState, HistoryEntry } from "../types/ChessTypes";
 import { ComputerPlayer, HumanPlayer, Player } from "../Player/Player";
 import { isSamePos } from "./MoveUtils";
 import { getPositionRelativeTo } from "./MoveUtils";
@@ -34,6 +34,12 @@ function cloneGameState(gameState: GameState): GameState {
   }
 
   return newGameState;
+}
+
+function getCurrentKingCheckStatus(gameState: GameState): CheckInfo {
+  const sideToMove: ColorType = gameState.sideToMove;
+
+  return gameState.checked[`${sideToMove}KingChecked`];
 }
 
 function getDirection(gameState: GameState, piece: Figure): Direction {
@@ -159,4 +165,4 @@ export const CHAR_TO_FIGURE_MAP: Record<string, FigureType> = {
 }
 
 
-export { getDirection, getPlayer,  isRankEndOfBoard, canAttackSquare, areAllies, containsInitialFigure, nextSideToMove, isPieceOnEndOfBoard, getPiecePosition, flipSideToMove, getDestroyedPiece, cloneGameState };
+export { getDirection, getPlayer,  isRankEndOfBoard, canAttackSquare, areAllies, containsInitialFigure, nextSideToMove, isPieceOnEndOfBoard, getPiecePosition, flipSideToMove, getDestroyedPiece, cloneGameState, getCurrentKingCheckStatus };
