@@ -85,7 +85,34 @@ function isSameHistoryEntry(entry1: HistoryEntry, entry2: HistoryEntry): boolean
   (entry1.piece === entry2.piece);
 }
 
-export { getMoveOffset, getPositionRelativeTo, getMove, inRange, positionInGrid, isMoveInGrid as moveInGrid, isSameHistoryEntry, isSameMove, isSamePos };
+function getPositionsBetween(a: Position, b: Position): Position[] {
+  if (!positionInGrid(a) || !positionInGrid(b)) {
+    throw new Error(`Positions ${a} and ${b} must be in Grid!`);
+  }
+
+  const positionsBetween: Position[] = [];
+  const vector: Position = getMoveOffset(getMove(a,b));
+
+  let reachedEnd: boolean = false;
+
+  const iterPos: Position = a;
+  while (!reachedEnd) {
+    iterPos.x += vector.x;
+    iterPos.y += vector.y;
+
+    if (!positionInGrid(iterPos)) {
+      return [];
+    }
+
+    reachedEnd = isSamePos(iterPos, b);
+
+    positionsBetween.push({...iterPos});
+  }
+
+  return positionsBetween;
+}
+
+export { getMoveOffset, getPositionRelativeTo, getMove, inRange, positionInGrid, isMoveInGrid as moveInGrid, isSameHistoryEntry, isSameMove, isSamePos, getPositionsBetween };
 
 
 

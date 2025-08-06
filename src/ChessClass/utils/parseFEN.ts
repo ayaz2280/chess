@@ -11,6 +11,8 @@ import { isDigit } from "./utils";
 import { FigureType } from "../Figure/FigureTypes";
 import { initGameStateHash } from "../Hashing/HashFunctions";
 import { CHAR_TO_FIGURE_MAP } from "./gameStateUtils";
+import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
+import { ChessEngine } from "../ChessEngine/ChessEngine";
 
 function parseFEN(fen: string): GameState {
   const board = new Board();
@@ -117,8 +119,8 @@ function parseFEN(fen: string): GameState {
     moveHistory: [],
     sideToMove: sideToMove,
     checked: {
-      whiteKingChecked: false,
-      blackKingChecked: false,
+      whiteKingChecked: {checkingPieces: []},
+      blackKingChecked: {checkingPieces: []},
     },
     castlingRights: castlingRights,
     enPassantTargetFile: enPassantTargetFile,
@@ -127,7 +129,11 @@ function parseFEN(fen: string): GameState {
     hash: 0n,
   };
 
+  updateChecks(gameState);
+
   initGameStateHash(gameState, gameState.enPassantTargetFile);
+
+  ChessEngine['updateLegalMovesCache'](gameState);
 
   return gameState;
 }

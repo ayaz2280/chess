@@ -12,4 +12,15 @@ function flushAllCaches(): void {
   PSEUDO_LEGAL_MOVES_CACHE.flushAll();
 }
 
-export { LEGAL_MOVES_CACHE, PSEUDO_LEGAL_MOVES_CACHE, flushAllCaches };
+function extractCache(cache: NodeCache): Record<string, any> {
+  const keys: string[] = cache.keys();
+
+  const cacheObj: Record<string, any> = {};
+  keys.forEach(key => {
+    cacheObj[key] = cache.get(key);
+  })
+
+  return cacheObj;
+}
+
+export { LEGAL_MOVES_CACHE, PSEUDO_LEGAL_MOVES_CACHE, flushAllCaches, extractCache };

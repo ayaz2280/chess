@@ -13,6 +13,7 @@ import { getQueenMoves } from "./FigureMovesGenerators/QueenMovesGenerator";
 import { getRookMoves } from "./FigureMovesGenerators/RookMovesGenerator";
 import { FigureType } from "../../Figure/FigureTypes";
 import { getCurrentKingCheckStatus } from "../../utils/gameStateUtils";
+import { getKey, getMovesKey } from "../../utils/hashUtils";
 
 type PseudoLegalMoveGenerator = (gameState: GameState, pos: Position, types?: ActionType[]) => HistoryEntry[];
 
@@ -39,9 +40,9 @@ function getMoves(gameState: GameState, position: Position, types?: ActionType[]
 
   const kingCheckStatus: StatusCheckInfo = getCurrentKingCheckStatus(gameState);
 
-  const typesKey: string = uniqueTypes ? uniqueTypes.join('_') : 'all';
 
-  const key: string = `${gameState.hash}:${position.x}${position.y}:${typesKey}`;
+  //const key: string = `${gameState.hash}:${position.x}${position.y}:${typesKey}`;
+  const key: string = getMovesKey('pseudo_legal_moves', gameState, position, types);
 
   pseudoLegalMoves = PSEUDO_LEGAL_MOVES_CACHE.get(key);
 

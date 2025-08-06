@@ -2,7 +2,7 @@ import { Board } from "../Board/Board";
 import { Figure } from "../Figure/Figure";
 
 import { ComputerPlayer, HumanPlayer } from "../Player/Player";
-import { GameState, HistoryEntry, CastlingMoveInfo, PlayerDetails } from "../types/ChessTypes";
+import { GameState, HistoryEntry, CastlingMoveInfo, PlayerDetails, StatusCheckInfo, ActionType } from "../types/ChessTypes";
 import { ChessGrid } from "../Board/BoardTypes";
 import { FigureType } from "../Figure/FigureTypes";
 import { Move, Position } from "../Moves/MoveTypes";
@@ -11,7 +11,7 @@ import { ColorType } from "../Player/PlayerTypes";
 import { assert } from "console";
 import { getMoves } from "../Moves/MovesGenerator/MovesGenerator";
 import { isHalfMove } from "../utils/historyUtils";
-import { flipSideToMove, getPiecePosition, nextSideToMove } from "../utils/gameStateUtils";
+import { flipSideToMove, getCurrentKingCheckStatus, getPiecePosition, nextSideToMove } from "../utils/gameStateUtils";
 import { filterMoves } from "../Moves/LegalityChecks/LegalMoveValidation";
 import { flushAllCaches, LEGAL_MOVES_CACHE } from "../Cache/Cache";
 import { getPieceNumber, HASH_CASTLING_RIGHTS_NUMBERS, HASH_EN_PASSANT_FILES_NUMBERS } from "../Hashing/HashConstants";
@@ -19,8 +19,11 @@ import { initGameStateHash } from "../Hashing/HashFunctions";
 import { requestCastlingRights, getEnPassantFile } from "../utils/evalGameStateUtils";
 import { moveToAlgNotation, parseAlgNotation, parseMove, posToAlgNotation } from "../Moves/AlgNotation/AlgNotation";
 import { saveGameStateToJson } from "../utils/jsonUtils";
-import { isSameMove } from "../utils/MoveUtils";
+import { getPositionsBetween, isSameMove } from "../utils/MoveUtils";
 import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
+import { isSquareAttackedBy } from "../utils/LegalityCheckUtils";
+import { getKey, getMovesKey } from "../utils/hashUtils";
+import { filterMovesLandingOn } from "../utils/filterUtils";
 
 
 export class ChessEngine {
@@ -66,6 +69,8 @@ export class ChessEngine {
     updateChecks(gameState);
 
     flushAllCaches();
+
+    this.updateLegalMovesCache(gameState);
 
     return gameState;
   }
@@ -245,6 +250,8 @@ export class ChessEngine {
     // restoring kings checked
     gameState.checked = lastEntry.prevDetails.prevChecked;
 
+    this.updateLegalMovesCache(gameState);
+
     return true;
   }
 
@@ -267,11 +274,18 @@ export class ChessEngine {
 
   }
 
+  public static getLegalMovesFromCache(gameState: GameState, pos: Position): HistoryEntry[] {
+    const key: string = getMovesKey('legal_moves', gameState, pos);
 
-  public static getLegalMoves(gameState: GameState, position: Position): HistoryEntry[] {
+    const legalMoves: HistoryEntry[] | undefined = LEGAL_MOVES_CACHE.get(key);
+
+    return legalMoves ?? [];
+  }
+
+  public static getLegalMoves(gameState: GameState, position: Position, types?: ActionType[]): HistoryEntry[] {
     if (!gameState.hash) initGameStateHash(gameState);
 
-    const key: string = `${gameState.hash}:${position.x}${position.y}`;
+    const key: string = getMovesKey('legal_moves', gameState, position, types);
 
     let legalMoves: HistoryEntry[] | undefined = LEGAL_MOVES_CACHE.get(key);
 
@@ -279,7 +293,7 @@ export class ChessEngine {
       return legalMoves;
     }
 
-    legalMoves = filterMoves(gameState, getMoves(gameState, position));
+    legalMoves = filterMoves(gameState, getMoves(gameState, position, types));
 
     LEGAL_MOVES_CACHE.set(key, legalMoves);
 
@@ -453,9 +467,84 @@ export class ChessEngine {
     }
     updateChecks(gameState);
 
-    flushAllCaches();
+    this.updateLegalMovesCache(gameState);
 
   }
 
-  
+  private static updateLegalMovesCache(gameState: GameState): void {
+    flushAllCaches();
+
+    const sideToMove: ColorType = gameState.sideToMove;
+    const statusCheckInfo: StatusCheckInfo = getCurrentKingCheckStatus(gameState);
+    const board: Board = gameState.board;
+
+    const figPositions: Position[] = [];
+    const legalMoves: HistoryEntry[] = [];
+
+    switch (statusCheckInfo.status) {
+      case 'NOT_CHECKED': {
+        figPositions.push(...board.findFigures('all', sideToMove));
+
+        figPositions.forEach(p => {
+          legalMoves.push(...this.getLegalMoves(gameState, p));
+        })
+        break;
+      }
+      case 'SINGLE_CHECK': {
+        figPositions.push(...board.findFigures(['king'], sideToMove));
+        const kingPos: Position = figPositions[0];
+        
+        legalMoves.push(...this.getLegalMoves(gameState, kingPos));
+        
+        const squareToEliminate: Position = statusCheckInfo.checkingPieces[0].pos;
+
+        const attackerMovesStorage: HistoryEntry[] = [];
+        const isDestroyable: boolean = isSquareAttackedBy(gameState, squareToEliminate, sideToMove, undefined, attackerMovesStorage);
+
+        if (isDestroyable) {
+          legalMoves.push(...filterMoves(gameState, attackerMovesStorage));
+        }
+
+        const checkingPiece: Figure = board.getPiece(squareToEliminate) as Figure;
+
+        if (checkingPiece.isSlidingPiece()) {
+          const blockingFigPositions: Position[] = board.findFigures('all', sideToMove);
+
+          const positionsBetween: Position[] = getPositionsBetween(squareToEliminate, kingPos);
+
+          const blockingMoves: HistoryEntry[] = 
+            filterMoves(
+              gameState, 
+              filterMovesLandingOn(
+              blockingFigPositions
+              .flatMap(pos => getMoves(gameState, pos)), positionsBetween
+              )
+            );
+
+          legalMoves.push(...blockingMoves);
+            
+        }
+
+        break;
+      }
+      case 'DOUBLE_CHECK': {
+        figPositions.push(...board.findFigures(['king'], sideToMove));
+        const kingPos: Position = figPositions[0];
+        
+        legalMoves.push(...this.getLegalMoves(gameState, kingPos));
+
+        break;
+      }
+    }
+
+    legalMoves.forEach(e => {
+      const key: string = getMovesKey('legal_moves', gameState, e.move.start);
+
+      const legalMoveStorage: HistoryEntry[] | undefined = LEGAL_MOVES_CACHE.get(key);
+
+      if (!legalMoveStorage) {
+        LEGAL_MOVES_CACHE.set(key, [e]);
+      }
+    })
+  }
 }

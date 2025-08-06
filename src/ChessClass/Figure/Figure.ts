@@ -1,5 +1,6 @@
 import type { FigureType } from "./FigureTypes";
 import type { ColorType } from "../Player/PlayerTypes";
+import { SLIDING_PIECE_TYPES } from "./FigureConstants";
 
 class Figure {
   private color: ColorType;
@@ -35,6 +36,10 @@ class Figure {
       color: this.color,
       piece: this.piece,
     }
+  }
+
+  isSlidingPiece(): boolean {
+    return SLIDING_PIECE_TYPES.includes(this.piece);
   }
 
   static clone(piece: Figure): Figure {
