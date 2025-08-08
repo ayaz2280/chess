@@ -64,6 +64,11 @@ type CheckInfo = {
 
 type KingCheckStatus = 'NOT_CHECKED' | 'SINGLE_CHECK' | 'DOUBLE_CHECK';
 
+type GameStatus = {
+  title: 'ongoing' | 'black wins' | 'white wins' |  'draw',
+  reason: undefined | 'opponent gave up' | 'stalemate' | 'checkmate' | '50 moves rule';
+}
+
 type StatusCheckInfo = {
   status: KingCheckStatus,
   checkingPieces: CheckingPieceDetail[],
@@ -86,6 +91,7 @@ type GameState = {
   enPassantTargetFile: number | null,
   halfMoveClock: number,
   fullMoveCounter: number,
+  status: GameStatus,
 }
 
 type PlayerDetails = {
@@ -95,4 +101,4 @@ type PlayerDetails = {
 
 
 
-export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail, StatusCheckInfo, KingCheckStatus};
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail, StatusCheckInfo, KingCheckStatus, GameStatus};

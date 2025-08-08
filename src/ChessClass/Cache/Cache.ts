@@ -23,4 +23,5 @@ function extractCache(cache: NodeCache): Record<string, any> {
   return cacheObj;
 }
 
+
 export { LEGAL_MOVES_CACHE, PSEUDO_LEGAL_MOVES_CACHE, flushAllCaches, extractCache };

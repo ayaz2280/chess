@@ -13,6 +13,7 @@ import { initGameStateHash } from "../Hashing/HashFunctions";
 import { CHAR_TO_FIGURE_MAP } from "./gameStateUtils";
 import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
 import { ChessEngine } from "../ChessEngine/ChessEngine";
+import { updateGameStatus } from "./GameStatusUtils";
 
 function parseFEN(fen: string): GameState {
   const board = new Board();
@@ -127,6 +128,10 @@ function parseFEN(fen: string): GameState {
     halfMoveClock: halfMoveClock,
     fullMoveCounter: fullMoveCounter,
     hash: 0n,
+    status: {
+      title: 'ongoing',
+      reason: undefined,
+    }
   };
 
   updateChecks(gameState);
@@ -134,6 +139,7 @@ function parseFEN(fen: string): GameState {
   initGameStateHash(gameState, gameState.enPassantTargetFile);
 
   ChessEngine['updateLegalMovesCache'](gameState);
+  updateGameStatus(gameState);
 
   return gameState;
 }

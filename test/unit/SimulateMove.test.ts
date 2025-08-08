@@ -1,10 +1,10 @@
-import { assert, expect } from "chai";
-import { Board } from "../../src/ChessClass/Board";
-import { ChessEngine } from "../../src/ChessClass/ChessEngine";
-import { parseAlgNotation, parseMove } from "../../src/ChessClass/HelperFunctions";
-import { GameState, Move, Position } from "../../src/ChessClass/types/ChessTypes";
-import { createTestGameState } from "../HelperTestFunctions";
-import { Figure } from "../../src/ChessClass/Figure/Figure";
+import { assert, expect } from 'chai';
+import { Board } from '../../src/ChessClass/Board/Board';
+import { Figure } from '../../src/ChessClass/Figure/Figure';
+import { GameState, Move, Position } from '../../src/ChessClass/types/ChessTypes';
+import { ChessEngine } from '../../src/ChessClass/ChessEngine/ChessEngine';
+import { parseMove, parseAlgNotation } from '../../src/ChessClass/Moves/AlgNotation/AlgNotation';
+import { simulateMove } from '../../src/ChessClass/Moves/MoveSimulation/SimulateMove';
 
 Error.stackTraceLimit = 5;
 
@@ -13,14 +13,14 @@ describe('simulateMove()', () => {
   let board: Board;
 
   beforeEach(() => {
-    gameState = createTestGameState();
+    gameState = ChessEngine.initGame({playerDetails: {player: 'human', opponent: 'human'}});
   });
 
   it('should apply pawn move correctly (a2-a4)', () => {
 
     const move: Move = parseMove('a2-a4');
 
-    const newGameState: GameState | null = ChessEngine['simulateMove'](gameState, move);
+    const newGameState: GameState | null = simulateMove(gameState, move);
 
     assert(newGameState !== null);
 
@@ -35,7 +35,7 @@ describe('simulateMove()', () => {
   it("shouldn't apply illegal pawn move (a2-a5)", () => {
     const move: Move = parseMove('a2-a5');
 
-    const newGameState: GameState | null = ChessEngine['simulateMove'](gameState, move);
+    const newGameState: GameState | null = simulateMove(gameState, move);
 
     expect(newGameState).to.equal(null);
   });
@@ -46,7 +46,7 @@ describe('simulateMove()', () => {
 
     const move: Move = parseMove('e1-g1');
 
-    const newGameState: GameState | null = ChessEngine['simulateMove'](gameState, move);
+    const newGameState: GameState | null = simulateMove(gameState, move);
 
     assert(newGameState !== null);
 

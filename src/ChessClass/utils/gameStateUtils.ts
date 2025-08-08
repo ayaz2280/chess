@@ -31,6 +31,7 @@ function cloneGameState(gameState: GameState): GameState {
     sideToMove: gameState.sideToMove,
     fullMoveCounter: gameState.fullMoveCounter,
     hash: gameState.hash,
+    status: structuredClone(gameState.status),
   }
 
   return newGameState;

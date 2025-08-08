@@ -7,6 +7,7 @@ import { CastlingMoveInfo, GameState, HistoryEntry, Move, Position } from "../..
 import { isFirstMove } from "../../utils/gameStateMovementUtils";
 
 import { getMoveOffset, getPositionRelativeTo, getMove, isSameMove } from "../../utils/MoveUtils";
+import { moveToAlgNotation } from "../AlgNotation/AlgNotation";
 import { getMoves } from "../MovesGenerator/MovesGenerator";
 import { isKingAttackedAfterMove, isKingChecked } from "./KingChecks";
 
@@ -92,7 +93,14 @@ function isValidCastlingEntry(gameState: GameState, castlingEntry: CastlingMoveI
 }
 
 function filterMoves(gameState: GameState, entries: HistoryEntry[]) {
-  return entries.filter(entry => validateMove(gameState, entry.move) ? true : false);
+  return entries.filter(entry => {
+    const validatedEntry: HistoryEntry | null = validateMove(gameState, entry.move);
+
+    const isValidEntry: boolean = validatedEntry ? true : false; 
+
+    //console.log(`is entry with move ${moveToAlgNotation(entry)} valid? ${isValidEntry}`);
+    return isValidEntry;
+  });
 }
 
 export { validateMove, isValidCastlingEntry, filterMoves };

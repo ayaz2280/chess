@@ -3,6 +3,7 @@ import { isSameMove } from "../../utils/MoveUtils";
 import { CastlingMoveInfo, GameState, HistoryEntry, Move } from "../../types/ChessTypes";
 import { cloneGameState, getPiecePosition } from "../../utils/gameStateUtils";
 import { getMoves } from "../MovesGenerator/MovesGenerator";
+import { ChessEngine } from "../../ChessEngine/ChessEngine";
 
 // FUNCTION IS TO BE REVIEWED
 /**
@@ -15,6 +16,11 @@ import { getMoves } from "../MovesGenerator/MovesGenerator";
     //console.log(newGameState);
 
     const entry: HistoryEntry | undefined = getMoves(newGameState, move.start).find(e => isSameMove(e.move, move));
+
+    if (!entry) return null;
+
+    ChessEngine.applyMove(newGameState, entry);
+    /*
 
     if (!entry)
       return null;
@@ -39,8 +45,9 @@ import { getMoves } from "../MovesGenerator/MovesGenerator";
         newGameState.board.removePiece(destroyedPiecePos);
       }
     }
+      */
 
-    return success ? newGameState : null;
+    return newGameState;
   }
 
   export { simulateMove };

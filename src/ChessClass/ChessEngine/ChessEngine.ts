@@ -24,15 +24,17 @@ import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
 import { isSquareAttackedBy } from "../utils/LegalityCheckUtils";
 import { getKey, getMovesKey } from "../utils/hashUtils";
 import { filterMovesLandingOn } from "../utils/filterUtils";
+import { InitGameInfo } from "../types/InitGameTypes";
+import { updateGameStatus } from "../utils/GameStatusUtils";
 
 
 export class ChessEngine {
   static applyHits: number = 0;
   static undoHits: number = 0;
-  static initGame(playerDetails: PlayerDetails, boardSetup?: ChessGrid | 'emptyBoard', sideToMove?: ColorType): GameState {
+  static initGame(gameInfo: InitGameInfo): GameState {
     const gameState: GameState = {
-      player: playerDetails.player === 'human' ? new HumanPlayer('white') : new ComputerPlayer('white'),
-      opponent: playerDetails.opponent === 'human' ? new HumanPlayer('black') : new ComputerPlayer('black'),
+      player: gameInfo.playerDetails.player === 'human' ? new HumanPlayer('white') : new ComputerPlayer('white'),
+      opponent: gameInfo.playerDetails.opponent === 'human' ? new HumanPlayer('black') : new ComputerPlayer('black'),
       board: new Board(),
       moveHistory: [],
       checked: {
@@ -51,15 +53,19 @@ export class ChessEngine {
         }
       },
       halfMoveClock: 0,
-      sideToMove: sideToMove ?? 'white',
+      sideToMove: gameInfo.sideToMove ?? 'white',
       fullMoveCounter: 1,
       hash: 0n,
+      status: {
+        title: 'ongoing',
+        reason: undefined,
+      }
     };
 
-    if (boardSetup && boardSetup !== 'emptyBoard') {
-      gameState.board.grid = boardSetup;
+    if (gameInfo.boardSetup && gameInfo.boardSetup !== 'emptyBoard') {
+      gameState.board.grid = gameInfo.boardSetup;
     }
-    if (!boardSetup) {
+    if (!gameInfo.boardSetup) {
       this.setupBoard(gameState.board);
     }
     gameState.castlingRights = requestCastlingRights(gameState);
@@ -71,6 +77,8 @@ export class ChessEngine {
     flushAllCaches();
 
     this.updateLegalMovesCache(gameState);
+
+    updateGameStatus(gameState);
 
     return gameState;
   }
@@ -112,9 +120,9 @@ export class ChessEngine {
     
     if (!pieceOnEnd) {
       // console.log(ChessEngine.applyHits);
-      board.display();
-      console.log(lastEntry);
-      saveGameStateToJson(gameState);
+      //board.display();
+      //console.log(lastEntry);
+      //saveGameStateToJson(gameState);
       throw new Error(`Couldn't find a piece on square ${posToAlgNotation(lastEntry.move.end)} (x: ${lastEntry.move.end.x}, y: ${lastEntry.move.end.y})`)
     }
       
@@ -251,6 +259,8 @@ export class ChessEngine {
     gameState.checked = lastEntry.prevDetails.prevChecked;
 
     this.updateLegalMovesCache(gameState);
+
+    updateGameStatus(gameState);
 
     return true;
   }
@@ -469,6 +479,7 @@ export class ChessEngine {
 
     this.updateLegalMovesCache(gameState);
 
+    updateGameStatus(gameState);
   }
 
   private static updateLegalMovesCache(gameState: GameState): void {

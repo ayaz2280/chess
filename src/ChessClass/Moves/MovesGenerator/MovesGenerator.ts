@@ -46,7 +46,7 @@ function getMoves(gameState: GameState, position: Position, types?: ActionType[]
 
   pseudoLegalMoves = PSEUDO_LEGAL_MOVES_CACHE.get(key);
 
-  if (pseudoLegalMoves) {
+  if (pseudoLegalMoves && pseudoLegalMoves.length > 0) {
     return pseudoLegalMoves;
   }
   pseudoLegalMoves = [];
