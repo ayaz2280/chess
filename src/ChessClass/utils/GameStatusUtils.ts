@@ -1,4 +1,5 @@
-import { LEGAL_MOVES_CACHE } from "../Cache/Cache";
+import { extractCache, LEGAL_MOVES_CACHE } from "../Cache/Cache";
+import { MovesCache } from "../Cache/CacheTypes";
 import { ChessEngine } from "../ChessEngine/ChessEngine";
 import { ColorType } from "../Player/PlayerTypes";
 import { GameState, GameStatus } from "../types/ChessTypes";
@@ -38,7 +39,9 @@ function isCheckmate(gameState: GameState): boolean {
 function isStalemate(gameState: GameState): boolean {
   //saveGameStateToJson(gameState);
   //gameState.board.display();
-  if (!legalMovesExist() && (!gameState.checked.blackKingChecked || !gameState.checked.whiteKingChecked)) {
+  const foundLegalMoves: boolean = legalMovesExist();
+
+  if (!foundLegalMoves && (gameState.checked.blackKingChecked.checkingPieces.length === 0 && gameState.checked.whiteKingChecked.checkingPieces.length === 0)) {
     return true;
   }
 
@@ -50,9 +53,18 @@ function isFiftyMovesRuleBroken(gameState: GameState): boolean {
 }
 
 function legalMovesExist(): boolean {
+  const cacheObj: MovesCache = extractCache(LEGAL_MOVES_CACHE);
+  
+  let foundLegalMoves: boolean = false;
 
-  //saveMoveCacheToJson(LEGAL_MOVES_CACHE);
-  return LEGAL_MOVES_CACHE.keys().length !== 0;
+  for (const key in cacheObj) {
+    if (cacheObj[key].length > 0) {
+      foundLegalMoves = true;
+      break;
+    }
+  }
+
+  return foundLegalMoves;
 }
 
 export { updateGameStatus };

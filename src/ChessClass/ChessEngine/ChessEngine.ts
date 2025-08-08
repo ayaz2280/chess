@@ -258,10 +258,6 @@ export class ChessEngine {
     // restoring kings checked
     gameState.checked = lastEntry.prevDetails.prevChecked;
 
-    this.updateLegalMovesCache(gameState);
-
-    updateGameStatus(gameState);
-
     return true;
   }
 
