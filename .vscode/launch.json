@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": [ "-r", "ts-node/register", "${workspaceRoot}/test/unit/SimulateMove.test.ts", "--no-timeouts"],
+            "args": [ "-r", "ts-node/register", "${workspaceRoot}/test/unit/updateLegalMoves.test.ts", "--no-timeouts"],
             "cwd": "${workspaceRoot}"
         }
     ]

@@ -3,6 +3,8 @@ import { InitGameInfo } from "../ChessClass/types/InitGameTypes";
 import { ChessEngine } from "../ChessClass/ChessEngine/ChessEngine";
 import { listCachedMoves } from "./utils";
 import { isSameMove } from "../ChessClass/utils/MoveUtils";
+import { updateChecks } from "../ChessClass/Moves/LegalityChecks/KingChecks";
+import { updateGameStatus } from "../ChessClass/utils/GameStatusUtils";
 
 class GameController {
   static startGame(gameInfo: InitGameInfo): GameState {
@@ -20,6 +22,12 @@ class GameController {
     }
 
     ChessEngine.applyMove(gameState, legalMove);
+
+    updateChecks(gameState);
+
+    ChessEngine.updateLegalMovesCache(gameState);
+
+    updateGameStatus(gameState);
 
     return true;
   }

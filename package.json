@@ -18,7 +18,7 @@
     "seedrandom": "^3.0.5"
   },
   "scripts": {
-    "test": "set NODE_OPTIONS=--import tsx&&mocha --require tsx test/unit/SimulateMove.test.ts",
+    "test": "set NODE_OPTIONS=--import tsx&&mocha --require tsx test/unit/updateLegalMoves.test.ts",
     "build": "tsc"
   }
 }

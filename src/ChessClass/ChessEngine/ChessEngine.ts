@@ -475,14 +475,9 @@ export class ChessEngine {
     } else {
       gameState.halfMoveClock = 0;
     }
-    updateChecks(gameState);
-
-    this.updateLegalMovesCache(gameState);
-
-    updateGameStatus(gameState);
   }
 
-  private static updateLegalMovesCache(gameState: GameState): void {
+  static updateLegalMovesCache(gameState: GameState): void {
     flushAllCaches();
 
     const sideToMove: ColorType = gameState.sideToMove;

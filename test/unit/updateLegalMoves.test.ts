@@ -52,7 +52,7 @@ describe('updateLegalMoves()', () => {
   });
 
   it('should store all legal moves in cache for all figures on game initialization', () => {
-    gameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
+    gameState = ChessEngine.initGame({playerDetails: {player: 'human', opponent: 'human'}});
     cacheObj = extractCache(LEGAL_MOVES_CACHE);
 
     //await delay(1000);
