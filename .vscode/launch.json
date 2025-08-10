@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": [ "-r", "ts-node/register", "${workspaceRoot}/test/integration/ChessEngine.moves.test.ts", "--no-timeouts"],
+            "args": [ "-r", "ts-node/register", "${workspaceRoot}/test/integration/timeEvaluation.test.ts", "--no-timeouts"],
             "cwd": "${workspaceRoot}"
         }
     ]
