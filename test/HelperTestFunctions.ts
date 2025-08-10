@@ -12,47 +12,6 @@ import { requestCastlingRights, getEnPassantFile } from "../src/ChessClass/utils
 import { styled } from "../src/ChessClass/utils/utils";
 
 
-
-const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorType = 'white'): GameState => {
-  const board = new Board();
-  if (boardGrid) {
-    board.grid = boardGrid; // Directly set grid for specific scenarios
-  } else {
-    // Default empty board or initial setup
-    ChessEngine.setupBoard(board); // Use actual setup for realism
-  }
-
-  const gameState: GameState =  {
-    player: currentPlayerColor === 'white' ? new HumanPlayer('white') : new ComputerPlayer('white'),
-    opponent: currentPlayerColor === 'white' ? new ComputerPlayer('black') : new HumanPlayer('black'),
-    board: board,
-    moveHistory: [],
-    checked: {
-      whiteKingChecked: false,
-      blackKingChecked: false,
-    },
-    castlingRights: {
-      white: {
-        kingSide: true,
-        queenSide: true,
-      },
-      black: {
-        kingSide: true,
-        queenSide: true,
-      }
-    },
-    enPassantTargetFile: null,
-    halfMoveClock: 0,
-    sideToMove: currentPlayerColor,
-    fullMoveCounter: 1,
-    hash: 0n,
-  };
-  gameState.castlingRights = requestCastlingRights(gameState);
-  gameState.enPassantTargetFile = getEnPassantFile(gameState);
-
-  return gameState;
-};
-
  const printEntries = (entries: HistoryEntry[]): void => {
   entries.forEach((e, id) => {
     console.log(`#${id} Entry`);
@@ -64,4 +23,4 @@ const createTestGameState = (boardGrid?: ChessGrid, currentPlayerColor: ColorTyp
   })
 } 
 
-export {createTestGameState, printEntries};
+export {printEntries};

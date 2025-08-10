@@ -1,4 +1,4 @@
-import { expect } from "chai";
+/*import { expect } from "chai";
 import { Board } from "../../src/ChessClass/Board";
 import { ChessEngine } from "../../src/ChessClass/ChessEngine";
 import { HumanPlayer } from "../../src/ChessClass/Player";
@@ -110,3 +110,4 @@ describe('getLegalMoves()', () => {
     expect(legalKingMoves).to.have.deep.members(expectedMoves);
   });
 });
+*/

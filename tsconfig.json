@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "nodenext",
-    "rootDir": "src",
+    "rootDirs": ["src", "test"],
     "outDir": "public/dist",
     "strict": true,
     "esModuleInterop": true,
@@ -14,5 +14,5 @@
     "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": [
-    "src/**/*.ts", "src/base.ts"]
+    "src/**/*.ts", "test/integration/*.ts"]
 }
