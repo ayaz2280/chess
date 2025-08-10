@@ -23,11 +23,11 @@ describe('perft test', () => {
   let gameState: GameState;
 
   before(() => {
-    gameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
+    gameState = ChessEngine.initGame({playerDetails: {player: 'human', opponent: 'human'}});
   });
     
   describe('initial position', () => {
-    gameState = ChessEngine.initGame({player: 'human', opponent: 'human'});
+    gameState = ChessEngine.initGame({playerDetails: {player: 'human', opponent: 'human'}});
     test(gameState, NODE_COUNT_INIT_POS);
   });
 });

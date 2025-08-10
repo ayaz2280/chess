@@ -64,9 +64,11 @@ type CheckInfo = {
 
 type KingCheckStatus = 'NOT_CHECKED' | 'SINGLE_CHECK' | 'DOUBLE_CHECK';
 
+type ReasonStatus = undefined | 'opponent gave up' | 'stalemate' | 'checkmate' | '50 moves rule';
+
 type GameStatus = {
   title: 'ongoing' | 'black wins' | 'white wins' |  'draw',
-  reason: undefined | 'opponent gave up' | 'stalemate' | 'checkmate' | '50 moves rule';
+  reason: ReasonStatus,
 }
 
 type StatusCheckInfo = {
@@ -99,6 +101,10 @@ type PlayerDetails = {
   opponent: PlayerType,
 }
 
+type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7';
 
+type PositionKey = `x${Digit}_y${Digit}`;
 
-export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail, StatusCheckInfo, KingCheckStatus, GameStatus};
+type LegalMovesMap = Partial<Record<PositionKey, HistoryEntry[][]>>;
+
+export type { Position, PlayerType, GameState, Move, BaseMoveInfo, CastlingMoveInfo, HistoryEntry, ActionType, CastlingRights, CastlingDetails, PromotionDetails, PlayerDetails, KingsChecked, CheckInfo, CheckingPieceDetail, StatusCheckInfo, KingCheckStatus, GameStatus, ReasonStatus, LegalMovesMap, PositionKey};

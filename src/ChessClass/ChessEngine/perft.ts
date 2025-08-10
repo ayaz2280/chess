@@ -1,7 +1,9 @@
 import { assert } from "chai";
 import { Position } from "../Moves/MoveTypes";
-import { GameState, HistoryEntry } from "../types/ChessTypes";
+import { GameState, HistoryEntry, LegalMovesMap } from "../types/ChessTypes";
 import { ChessEngine } from "./ChessEngine";
+import { listCachedMoves } from "../../GameController/utils";
+import { GameController } from "../../GameController/GameController";
 
 function perft(gameState: GameState, depth: number): number {
   assert(Number.isInteger(depth));
@@ -12,19 +14,14 @@ function perft(gameState: GameState, depth: number): number {
 
   let nodes: number = 0;
 
-  const figPositions: Position[] = gameState.board.findFigures('all', gameState.sideToMove);
+  const entries: HistoryEntry[] = Object.values(GameController.getLegalMoves(gameState)).flat(2);
 
-  figPositions.forEach(pos => {
-    const entries: HistoryEntry[] = ChessEngine.getLegalMoves(gameState, pos);
-
-
-    entries.forEach(entry => {
-      ChessEngine.applyMove(gameState, entry);
-      nodes += perft(gameState, depth-1);
-      
-      ChessEngine.undoLastMove(gameState);
-    })
-  });
+  entries.forEach(entry => {
+    GameController.makeMove(gameState, entry.move);
+    nodes += perft(gameState, depth-1);
+    
+    GameController.unmakeMove(gameState);
+  })
 
   return nodes;
 }

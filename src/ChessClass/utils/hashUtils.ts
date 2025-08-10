@@ -1,4 +1,4 @@
-import { ActionType, GameState, HistoryEntry, Position } from "../types/ChessTypes";
+import { ActionType, GameState, HistoryEntry, Position, PositionKey } from "../types/ChessTypes";
 
 function getKey(...args: string[]): string {
   return args.join(':');
@@ -12,6 +12,9 @@ function getMovesKey(moveCategory: 'legal_moves' | 'pseudo_legal_moves', gameSta
   return key;
 }
 
+function getPosKey(pos: Position): PositionKey {
+  return `x${pos.x}_y${pos.y}` as PositionKey;
+}
 
 
-export { getKey, getMovesKey };
+export { getKey, getMovesKey, getPosKey };
