@@ -1,8 +1,6 @@
-import { assert } from "chai";
-import { Board } from "../Board/Board";
-import { Figure } from "../Figure/Figure";
 
-import { parseAlgNotation } from "../Moves/AlgNotation/AlgNotation";
+
+import { parseAlgNotation } from "../LegacyMoves/AlgNotation/AlgNotation";
 import { HumanPlayer } from "../Player/Player";
 import { ColorType } from "../Player/PlayerTypes";
 import { GameState, CastlingRights } from "../types/ChessTypes";
@@ -11,12 +9,12 @@ import { isDigit } from "./utils";
 import { FigureType } from "../Figure/FigureTypes";
 import { initGameStateHash } from "../Hashing/HashFunctions";
 import { CHAR_TO_FIGURE_MAP } from "./gameStateUtils";
-import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
+import { updateChecks } from "../LegacyMoves/LegalityChecks/KingChecks";
 import { ChessEngine } from "../ChessEngine/ChessEngine";
 import { updateGameStatus } from "./GameStatusUtils";
-import { Bitboard, EnumPiece } from "../BitBoard/BitboardTypes";
-import { BoardBB } from "../BitBoard/Board";
-import { getEnumPieceType } from "../BitBoard/bbUtils";
+import { Bitboard, EnumPiece } from "../BoardBB/BitboardTypes";
+import { BoardBB } from "../BoardBB/Board";
+import { getEnumPieceType } from "../BoardBB/bbUtils";
 import { getPosFromNumber } from "./MoveUtils";
 
 function parseBoardBB(fenPiecePlacement: string): BoardBB {
@@ -26,27 +24,30 @@ function parseBoardBB(fenPiecePlacement: string): BoardBB {
   if (piecesPlacementArr.length !== 8) {
     throw new Error(`Parsing FEN Error: Pieces Placement: Expected 8 rows, got ${piecesPlacementArr.length}`);
   }
-  const piecesPlacement: string = piecesPlacementArr.join();
+  const piecesPlacement: string = piecesPlacementArr.join('');
   
   let x: number = 63;
+  let i: number = 0;
 
-  for (let i = 0; i < 64; i++) {
+  while (i < 64 && x >= 0) {
     const c: string = piecesPlacement.charAt(i);
 
     if (isDigit(c)) {
       x -= +c;
-      i += +c;
     } else {
       const color: EnumPiece = c.toUpperCase() === c ? EnumPiece.White : EnumPiece.Black;
       const type: EnumPiece = getEnumPieceType(c);
-      board.placePiece(color, type, getPosFromNumber(x)) ;
+      board.placePieceOnBit(color, type, x);
+      x--;
     }
+
+    i++;
   }
 
   return board;
 }
 
-
+/*
 function parseFEN(fen: string): GameState {
   const board = new Board();
 
@@ -224,5 +225,5 @@ function getFigureFromChar(f: string): Figure {
 
   return new Figure(color, figType);
 }
-
-export { parseFEN };
+*/
+export { parseBoardBB };

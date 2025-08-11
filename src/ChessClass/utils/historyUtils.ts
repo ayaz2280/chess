@@ -1,6 +1,6 @@
 import { Board } from "../Board/Board";
 import { Figure } from "../Figure/Figure";
-import { parseAlgNotation, parseMove } from "../Moves/AlgNotation/AlgNotation";
+import { parseAlgNotation, parseMove } from "../LegacyMoves/AlgNotation/AlgNotation";
 import { Player } from "../Player/Player";
 import { ColorType } from "../Player/PlayerTypes";
 import { ActionType, CastlingDetails, GameState, HistoryEntry, Move, Position, PromotionDetails } from "../types/ChessTypes";

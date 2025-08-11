@@ -3,7 +3,7 @@ import { InitGameInfo } from "../ChessClass/types/InitGameTypes";
 import { ChessEngine } from "../ChessClass/ChessEngine/ChessEngine";
 import { listCachedMoves } from "./utils";
 import { isSameMove } from "../ChessClass/utils/MoveUtils";
-import { updateChecks } from "../ChessClass/Moves/LegalityChecks/KingChecks";
+import { updateChecks } from "../ChessClass/LegacyMoves/LegalityChecks/KingChecks";
 import { updateGameStatus } from "../ChessClass/utils/GameStatusUtils";
 import { saveMoveCacheToJson } from "../ChessClass/utils/jsonUtils";
 import { extractCache, flushAllCaches, LEGAL_MOVES_CACHE } from "../ChessClass/Cache/Cache";

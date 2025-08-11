@@ -1,4 +1,4 @@
-import { Position, Move } from "../Moves/MoveTypes";
+import { Position, Move } from "../LegacyMoves/MoveTypes";
 import { inRange } from "./utils";
 
 

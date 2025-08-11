@@ -1,6 +1,6 @@
 import { Board } from "../Board/Board";
-import { parseMove } from "../Moves/AlgNotation/AlgNotation";
-import { Position } from "../Moves/MoveTypes";
+import { parseMove } from "../LegacyMoves/AlgNotation/AlgNotation";
+import { Position } from "../LegacyMoves/MoveTypes";
 import { ColorType } from "../Player/PlayerTypes";
 import { GameState, HistoryEntry, CastlingRights } from "../types/ChessTypes";
 import { isFirstMove } from "./gameStateMovementUtils";

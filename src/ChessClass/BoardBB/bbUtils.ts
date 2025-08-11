@@ -1,4 +1,4 @@
-import { Position } from "../Moves/MoveTypes";
+import { Position } from "../LegacyMoves/MoveTypes";
 import { Bitboard, EnumPiece } from "./BitboardTypes";
 
 function getMaskFromPos(pos: Position): Bitboard {

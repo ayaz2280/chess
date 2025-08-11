@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { Position } from "../Moves/MoveTypes";
+import { Position } from "../LegacyMoves/MoveTypes";
 import { GameState, HistoryEntry, LegalMovesMap } from "../types/ChessTypes";
 import { ChessEngine } from "./ChessEngine";
 import { listCachedMoves } from "../../GameController/utils";

@@ -1,6 +1,6 @@
 import { INIT_SETUP_BOARD } from "../Board/Board";
 import { Figure } from "../Figure/Figure";
-import { Position } from "../Moves/MoveTypes";
+import { Position } from "../LegacyMoves/MoveTypes";
 import { GameState } from "../types/ChessTypes";
 import { positionInGrid } from "./boardUtils";
 

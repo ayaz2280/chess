@@ -1,4 +1,4 @@
-import type { Move } from "../Moves/MoveTypes";
+import type { Move } from "../LegacyMoves/MoveTypes";
 import type { ColorType, PlayerType } from "./PlayerTypes";
 
 abstract class Player {

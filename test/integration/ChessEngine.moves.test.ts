@@ -4,7 +4,7 @@ import { Figure } from "../../src/ChessClass/Figure/Figure";
 import { GameState } from "../../src/ChessClass/types/ChessTypes";
 
 import { ChessEngine } from "../../src/ChessClass/ChessEngine/ChessEngine";
-import { parseAlgNotation } from "../../src/ChessClass/Moves/AlgNotation/AlgNotation";
+import { parseAlgNotation } from "../ChessClass/LegacyMoves/AlgNotation/AlgNotation";
 import { placeFigure } from "../../src/ChessClass/ChessEngine/DebugFunctions";
 import { perft } from "../../src/ChessClass/ChessEngine/perft";
 

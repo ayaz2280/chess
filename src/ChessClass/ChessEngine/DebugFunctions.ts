@@ -4,7 +4,7 @@ import { Figure } from "../Figure/Figure";
 
 import { isSameMove } from "../utils/MoveUtils";
 
-import { Move, Position } from "../Moves/MoveTypes";
+import { Move, Position } from "../LegacyMoves/MoveTypes";
 import { GameState, HistoryEntry } from "../types/ChessTypes";
 import { ChessEngine } from "./ChessEngine";
 import { getPieceNumber } from "../Hashing/HashConstants";

@@ -1,7 +1,7 @@
 import { Board, INIT_SETUP_BOARD } from "../Board/Board";
 import { Figure } from "../Figure/Figure";
-import { getMoves } from "../Moves/MovesGenerator/MovesGenerator";
-import { Position } from "../Moves/MoveTypes";
+import { getMoves } from "../LegacyMoves/MovesGenerator/MovesGenerator";
+import { Position } from "../LegacyMoves/MoveTypes";
 import { ColorType } from "../Player/PlayerTypes";
 import { CheckInfo, GameState, HistoryEntry } from "../types/ChessTypes";
 import { isSamePos } from "./MoveUtils";

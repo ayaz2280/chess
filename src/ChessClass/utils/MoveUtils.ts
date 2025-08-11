@@ -1,4 +1,4 @@
-import { Direction, Move, Position } from "../Moves/MoveTypes";
+import { Direction, Move, Position } from "../LegacyMoves/MoveTypes";
 import { CastlingMoveInfo, HistoryEntry } from "../types/ChessTypes";
 import { positionInGrid, isMoveInGrid } from "./boardUtils";
 import { inRange } from "./utils";

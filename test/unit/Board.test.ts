@@ -1,100 +1,58 @@
-import { assert, expect } from "chai";
-import { Board } from "../../public/dist/ChessClass/Board";
-import { ChessGrid, Move, Position } from "../../src/ChessClass/types/ChessTypes";
-import { Figure } from "../../src/ChessClass/Figure/Figure";
-import { parseAlgNotation, parseMove } from "../../src/ChessClass/HelperFunctions";
+import { expect } from 'chai';
+import { Bitboard, EnumPiece } from '../../src/ChessClass/BoardBB/BitboardTypes';
+import { BoardBB } from '../../src/ChessClass/BoardBB/Board';
+import { parseBoardBB } from '../../src/ChessClass/utils/parseFEN';
 
-describe('Board', () => {
-  let board: Board;
-  let piece: Figure;
+describe('BitBoard', () => {
+  let boardBB: BoardBB;
 
-  it("new Board() creates a new 8x8 empty array with each element equals 'null'", () => {
-    board = new Board();
+  describe('parsing', () => {
+    it('should place a pawn correctly', () => {
+      const fenPlacement: string = '8/8/8/8/8/8/8/6P1';
 
-    expect(board).to.have.property('grid').with.lengthOf(8);
+      boardBB = parseBoardBB(fenPlacement);
 
-    const allSubarraysAreValid = board.grid.every(subarr => {
-      expect(subarr).to.have.lengthOf(8);
+      const resBitboard: Bitboard = boardBB.getPieces(EnumPiece.White, EnumPiece.Pawn);
+      const expectedBitboard: Bitboard = 0x0000000000000002n;
 
-      subarr.every(val => assert.equal(val, null));
+      expect(resBitboard).to.deep.equal(expectedBitboard);
+    })
+
+    it('should set starting pieces correctly', () => {
+      const fenPlacement: string = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+
+      boardBB = parseBoardBB(fenPlacement);
+
+      const fullBitboard: Bitboard = boardBB.getPieces();
+      const whiteBitBoard: Bitboard = boardBB.getPieces(EnumPiece.White);
+      const blackBitBoard: Bitboard = boardBB.getPieces(EnumPiece.Black);
+      const pawnBitBoard: Bitboard = boardBB.getPieces(EnumPiece.Pawn);
+      const knightBitBoard: Bitboard = boardBB.getPieces(EnumPiece.Knight);
+      const queenBitBoard: Bitboard = boardBB.getPieces(EnumPiece.Queen);
+      const kingBitBoard: Bitboard = boardBB.getPieces(EnumPiece.King);
+      const rookBitBoard: Bitboard = boardBB.getPieces(EnumPiece.Rook);
+      const bishopBitBoard: Bitboard = boardBB.getPieces(EnumPiece.Bishop);
+
+      const expectedFullBitboard: Bitboard = 0b1111111111111111000000000000000000000000000000001111111111111111n;
+      const expectedWhiteBitboard: Bitboard =0b0000000000000000000000000000000000000000000000001111111111111111n;
+      const expectedBlackBitboard: Bitboard =0b1111111111111111000000000000000000000000000000000000000000000000n;
+      
+      const expectedPawnBitboard: Bitboard = 0b0000000011111111000000000000000000000000000000001111111100000000n;
+      const expectedKnightBitboard: Bitboard=0b0100001000000000000000000000000000000000000000000000000001000010n;
+      const expectedQueenBitboard: Bitboard =0b0001000000000000000000000000000000000000000000000000000000010000n;
+      const expectedKingBitboard: Bitboard = 0b0000100000000000000000000000000000000000000000000000000000001000n;
+      const expectedRookBitboard: Bitboard = 0b1000000100000000000000000000000000000000000000000000000010000001n;
+      const expectedBishopBitboard: Bitboard=0b0010010000000000000000000000000000000000000000000000000000100100n;
+      
+      expect(fullBitboard).to.equal(expectedFullBitboard);
+      expect(whiteBitBoard).to.equal(expectedWhiteBitboard);
+      expect(blackBitBoard).to.equal(expectedBlackBitboard);
+      expect(pawnBitBoard).to.equal(expectedPawnBitboard);
+      expect(knightBitBoard).to.equal(expectedKnightBitboard);
+      expect(queenBitBoard).to.equal(expectedQueenBitboard);
+      expect(kingBitBoard).to.equal(expectedKingBitboard);
+      expect(rookBitBoard).to.equal(expectedRookBitboard);
+      expect(bishopBitBoard).to.equal(expectedBishopBitboard);
     })
   });
-
-  it("new Board(grid) creates a new board with a deepclone of grid", () => {
-    const initGrid: any = [[],[],[],[],[],[],[],[]];
-
-    initGrid.forEach((subArr, id) => {
-      for (let x = 0; x < 8; x++) {
-        initGrid[id].push(new Figure('black', 'king'));
-      }
-    });
-
-    board = new Board(initGrid as ChessGrid);
-
-    expect(board).to.have.property('grid').with.lengthOf(8);
-
-    const allSubarraysAreValid = board.grid.every((subarr,y) => {
-      expect(subarr).to.have.lengthOf(8);
-
-      subarr.every((val,x) => expect(val).to.deep.equal(initGrid[y][x]) && expect(val).to.not.equal(initGrid[y][x]));
-    })
-  })
-
-  describe('Pieces Manipulation', () => {
-    beforeEach(() => {
-      board = new Board();
-      piece = new Figure('white', 'pawn')
-    });
-
-    describe('Place', () => {
-      beforeEach(() => {
-        board = new Board();
-      });
-
-      it('The pawn is placed at A2', () => {
-        board.place(piece, parseAlgNotation('a2'));
-
-        assert.equal(board.getPiece(parseAlgNotation('a2')), piece);
-      });
-
-      it('The pawn is placed at H8', () => {
-        board.place(piece, parseAlgNotation('h8'));
-
-        assert.equal(board.getPiece(parseAlgNotation('h8')), piece);
-      });
-
-      it('Throws an error when placed out of grid', () => {
-        const posOutOfGrid: Position = {x: 10, y:10};
-        expect(() => { board.place(piece, posOutOfGrid)}).to.throw();
-      })
-    });
-
-    describe('Move', () => {
-      beforeEach(() => {
-        board = new Board();
-        board.place(piece, parseAlgNotation('a2'));
-      })
-
-      it('Piece is landed on D2', () => {
-        const move: Move = parseMove('a2-d2');
-        board.move(move);
-        assert.equal(piece, board.getPiece(parseAlgNotation('d2')));
-      }); 
-
-      it("Throws an error if Move is out of grid", () => {
-        const illegalMove: Move = {
-          start: {
-            x: 200,
-            y: 200,
-          },
-          end: {
-            x: 5000,
-            y: -5000,
-          }
-        }
-
-        expect(() => { board.move(illegalMove); }).to.throw();
-      })
-    });
-  });
-});
+})

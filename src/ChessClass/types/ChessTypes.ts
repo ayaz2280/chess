@@ -3,7 +3,7 @@ import { Figure } from "../Figure/Figure";
 import { FigureType } from "../Figure/FigureTypes";
 import { Player } from "../Player/Player";
 import { ColorType, PlayerType } from "../Player/PlayerTypes";
-import { Move, Position } from "../Moves/MoveTypes";
+import { Move, Position } from "../LegacyMoves/MoveTypes";
 
 type ActionType = 'move' | 'attackMove' | 'checkmate' | 'stalemate' | 'castling' | 'enPassant';
 

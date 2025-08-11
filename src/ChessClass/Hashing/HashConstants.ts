@@ -1,7 +1,7 @@
 import seedrandom, { PRNG } from 'seedrandom';
 import { range } from '../utils/utils';
 import { FigureType } from '../Figure/FigureTypes';
-import { Position } from '../Moves/MoveTypes';
+import { Position } from '../LegacyMoves/MoveTypes';
 import { ColorType } from '../Player/PlayerTypes';
 import { positionInGrid } from "../utils/boardUtils";
 

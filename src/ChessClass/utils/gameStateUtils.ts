@@ -1,4 +1,4 @@
-import { Direction, Move, Position } from "../Moves/MoveTypes";
+import { Direction, Move, Position } from "../LegacyMoves/MoveTypes";
 import { Figure } from "../Figure/Figure";
 import { CheckInfo, GameState, HistoryEntry, KingCheckStatus, StatusCheckInfo } from "../types/ChessTypes";
 import { ComputerPlayer, HumanPlayer, Player } from "../Player/Player";
