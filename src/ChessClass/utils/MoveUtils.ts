@@ -18,6 +18,16 @@ function getMoveOffset(move: Move, direction: Direction = 'forward'): Position {
   }
 }
 
+function getPosFromNumber(num: number): Position {
+  if (!inRange(num, 0, 63)) {
+    throw new Error(`Number ${num} is not in range 0-63`);
+  }
+
+  const y: number = Math.floor(num / 8);
+  const x: number = num - 8 * y;
+
+  return {x: x, y:y};
+}
 /**
    * Gets a position adding *pos* and *offset*
    * 
@@ -112,7 +122,7 @@ function getPositionsBetween(a: Position, b: Position): Position[] {
   return positionsBetween;
 }
 
-export { getMoveOffset, getPositionRelativeTo, getMove, inRange, positionInGrid, isMoveInGrid as moveInGrid, isSameHistoryEntry, isSameMove, isSamePos, getPositionsBetween };
+export { getMoveOffset, getPositionRelativeTo, getMove, inRange, positionInGrid, isMoveInGrid as moveInGrid, isSameHistoryEntry, isSameMove, isSamePos, getPositionsBetween, getPosFromNumber };
 
 
 

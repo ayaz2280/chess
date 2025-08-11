@@ -1,23 +1,13 @@
 import { Position } from "../Moves/MoveTypes";
 import { getMaskFromPos } from "./bbUtils";
 import { emptyBitboard } from "./BitboardConstants";
-import { Bitboard } from "./BitboardTypes";
+import { Bitboard, EnumPiece } from "./BitboardTypes";
 
-enum EnumPiece {
-    White,
-    Black,
-    Pawn,
-    Knight,
-    Bishop,
-    Queen,
-    King
-}
-
-class Board {
+class BoardBB {
   private pieceBB: Bitboard[];
 
-  constructor(pieceBB: Bitboard[]) {
-    this.pieceBB = pieceBB ?? Board.createEmptyBoard();
+  constructor(pieceBB?: Bitboard[]) {
+    this.pieceBB = pieceBB ?? BoardBB.createEmptyBoard();
   }
 
   static createEmptyBoard(): Bitboard[] {
@@ -59,3 +49,5 @@ class Board {
     this.pieceBB[type] &= posMask;
   }
 } 
+
+export { BoardBB };

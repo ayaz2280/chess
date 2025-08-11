@@ -14,6 +14,38 @@ import { CHAR_TO_FIGURE_MAP } from "./gameStateUtils";
 import { updateChecks } from "../Moves/LegalityChecks/KingChecks";
 import { ChessEngine } from "../ChessEngine/ChessEngine";
 import { updateGameStatus } from "./GameStatusUtils";
+import { Bitboard, EnumPiece } from "../BitBoard/BitboardTypes";
+import { BoardBB } from "../BitBoard/Board";
+import { getEnumPieceType } from "../BitBoard/bbUtils";
+import { getPosFromNumber } from "./MoveUtils";
+
+function parseBoardBB(fenPiecePlacement: string): BoardBB {
+  const board: BoardBB = new BoardBB();
+
+  const piecesPlacementArr: string[] = fenPiecePlacement.split('/');
+  if (piecesPlacementArr.length !== 8) {
+    throw new Error(`Parsing FEN Error: Pieces Placement: Expected 8 rows, got ${piecesPlacementArr.length}`);
+  }
+  const piecesPlacement: string = piecesPlacementArr.join();
+  
+  let x: number = 63;
+
+  for (let i = 0; i < 64; i++) {
+    const c: string = piecesPlacement.charAt(i);
+
+    if (isDigit(c)) {
+      x -= +c;
+      i += +c;
+    } else {
+      const color: EnumPiece = c.toUpperCase() === c ? EnumPiece.White : EnumPiece.Black;
+      const type: EnumPiece = getEnumPieceType(c);
+      board.placePiece(color, type, getPosFromNumber(x)) ;
+    }
+  }
+
+  return board;
+}
+
 
 function parseFEN(fen: string): GameState {
   const board = new Board();
