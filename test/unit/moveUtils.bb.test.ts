@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Bitboard, EnumPiece } from '../../src/ChessClass/BoardBB/BitboardTypes';
-import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset } from '../../src/ChessClass/MovesBB/MoveUtils';
+import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset } from '../../src/ChessClass/MovesBB/MoveUtils';
 
 describe('MoveBB.MoveUtils', () => {
   describe('getRankBitboard', () => {
@@ -45,6 +45,32 @@ describe('MoveBB.MoveUtils', () => {
 
           expect(rankUp).to.equal(expectedRankUp);
           expect(rankDown).to.equal(expectedRankDown);
+        }
+      }
+    });
+
+    it('should return correct files with offset for bits from 0 to 63', () => {
+      const expectedFiles: Bitboard[] = [
+        0b1000000010000000100000001000000010000000100000001000000010000000n,
+        0b0100000001000000010000000100000001000000010000000100000001000000n,
+        0b0010000000100000001000000010000000100000001000000010000000100000n,
+        0b0001000000010000000100000001000000010000000100000001000000010000n,
+        0b0000100000001000000010000000100000001000000010000000100000001000n,
+        0b0000010000000100000001000000010000000100000001000000010000000100n,
+        0b0000001000000010000000100000001000000010000000100000001000000010n,
+        0b0000000100000001000000010000000100000001000000010000000100000001n
+      ];
+
+      for (let bit = 0; bit < 64; bit++) {
+        for (let offset = 0; offset <= 7; offset++) {
+          const fileLeft = getFileBitboardWithOffset(bit, offset, 'LEFT');
+          const fileRight = getFileBitboardWithOffset(bit, offset, 'RIGHT');
+
+          const expectedFileLeft: Bitboard = expectedFiles[Math.max(0, Math.floor(bit % 8) - offset)];
+          const expectedFileRight: Bitboard = expectedFiles[Math.min(7, Math.floor(bit % 8) + offset)];
+
+          expect(fileLeft).to.equal(expectedFileLeft);
+          expect(fileRight).to.equal(expectedFileRight);
         }
       }
     });
