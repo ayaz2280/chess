@@ -1,6 +1,6 @@
 import { Position } from "../LegacyMoves/MoveTypes";
 import { inRange } from "../utils/utils";
-import { getMaskFromPos } from "./bbUtils";
+import { getMaskFromPos, getPosMask } from "./bbUtils";
 import { emptyBitboard } from "./BitboardConstants";
 import { Bitboard, EnumPiece } from "./BitboardTypes";
 
@@ -44,11 +44,7 @@ class BoardBB {
   }
 
   placePieceOnBit(color: EnumPiece, type: EnumPiece, bit: number): void {
-    if (!inRange(bit, 0, 63)) {
-      throw new Error(`Pos ${bit} is not in range 0-63`);
-    }
-
-    const posMask: Bitboard = 1n << BigInt(bit);
+    const posMask: Bitboard = getPosMask(bit);
 
     this.pieceBB[color] |= posMask;
     this.pieceBB[type] |= posMask;

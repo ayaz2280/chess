@@ -1,8 +1,17 @@
 import { Position } from "../LegacyMoves/MoveTypes";
+import { inRange } from "../utils/utils";
 import { Bitboard, EnumPiece } from "./BitboardTypes";
 
 function getMaskFromPos(pos: Position): Bitboard {
-  return 1n << BigInt(pos.y * 8 + pos.x);
+  return getPosMask(pos.y * 8 + pos.x);
+}
+
+function getPosMask(bit: number): Bitboard {
+  if (!inRange(bit, 0, 63)) {
+    throw new Error(`Bit ${bit} is not in range from 0 to 63`);
+  }
+
+  return 1n << ( 8n * (BigInt(bit) / 8n) - BigInt(bit) % 8n + 7n );
 }
 
 function getEnumPieceType(piece: string): EnumPiece {
@@ -18,4 +27,4 @@ function getEnumPieceType(piece: string): EnumPiece {
   }
 }
 
-export { getMaskFromPos, getEnumPieceType };
+export { getMaskFromPos, getEnumPieceType, getPosMask };
