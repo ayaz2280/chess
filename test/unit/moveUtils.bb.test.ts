@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Bitboard, EnumPiece } from '../../src/ChessClass/BoardBB/BitboardTypes';
-import { getRankBitboard, getFileBitboard } from '../../src/ChessClass/MovesBB/MoveUtils';
+import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset } from '../../src/ChessClass/MovesBB/MoveUtils';
 
 describe('MoveBB.MoveUtils', () => {
   describe('getRankBitboard', () => {
@@ -22,10 +22,36 @@ describe('MoveBB.MoveUtils', () => {
         expect(rank).to.equal(expectedRanks[i]);
       }
     });
+
+    it('should return correct ranks with offset for bits from 0 to 63', () => {
+      const expectedRanks: Bitboard[] = [
+        0x00000000000000ffn,
+        0x000000000000ff00n,
+        0x0000000000ff0000n,
+        0x00000000ff000000n,
+        0x000000ff00000000n,
+        0x0000ff0000000000n,
+        0x00ff000000000000n,
+        0xff00000000000000n
+      ];
+
+      for (let bit = 0; bit < 64; bit++) {
+        for (let offset = 0; offset <= 7; offset++) {
+          const rankUp = getRankBitboardWithOffset(bit, offset, 'UP');
+          const rankDown = getRankBitboardWithOffset(bit, offset, 'DOWN');
+
+          const expectedRankUp: Bitboard = expectedRanks[Math.min(7, Math.floor(bit / 8) + offset)];
+          const expectedRankDown: Bitboard = expectedRanks[Math.max(0, Math.floor(bit / 8) - offset)];
+
+          expect(rankUp).to.equal(expectedRankUp);
+          expect(rankDown).to.equal(expectedRankDown);
+        }
+      }
+    });
   });
 
   describe('getFileBitboard', () => {
-    it('should return correct ranks for bits from 0 to 63', () => {
+    it('should return correct files for bits from 0 to 63', () => {
       const base: string[] = '00000000'.split('');
       const expectedFiles: Bitboard[] = [];
 
