@@ -1,10 +1,6 @@
 import { filledBitboard } from "../BoardBB/BitboardConstants";
 import { Bitboard } from "../BoardBB/BitboardTypes";
-
-const MINIMAL_RANK: Bitboard = 0x00000000000000ffn;
-const MAXIMAL_RANK: Bitboard = 0xff00000000000000n;
-const LEFTMOST_FILE: Bitboard =  0b1000000010000000100000001000000010000000100000001000000010000000n;
-const RIGHTMOST_FILE: Bitboard = 0b0000000100000001000000010000000100000001000000010000000100000001n;
+import { LEFTMOST_FILE, RIGHTMOST_FILE, MAXIMAL_RANK, MINIMAL_RANK, RIGHT_DIAGONAL_BIT_MAP, LEFT_DIAGONAL_BIT_MAP } from "./MoveConstants";
 
 function getFileBitboard(bit: number): Bitboard {
   if (bit < 0 || bit > 63) {
@@ -74,4 +70,28 @@ function getRankBitboardWithOffset(bit: number, offset: number, direction: 'UP' 
   return rankBbOffset;
 }
 
-export { getFileBitboard, getRankBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset };
+function getRightDiagonalFromBit(bit: number): Bitboard {
+  if (bit < 0 || bit > 63) {
+    throw new Error(`Bit ${bit} is out of range (0-63)`);
+  }
+  
+  return RIGHT_DIAGONAL_BIT_MAP[bit];
+}
+
+function getLeftDiagonalFromBit(bit: number): Bitboard {
+  if (bit < 0 || bit > 63) {
+    throw new Error(`Bit ${bit} is out of range (0-63)`);
+  }
+  
+  return LEFT_DIAGONAL_BIT_MAP[bit];
+}
+
+function getDiagonalsFromBit(bit: number): Bitboard {
+  if (bit < 0 || bit > 63) {
+    throw new Error(`Bit ${bit} is out of range (0-63)`);
+  }
+
+  return LEFT_DIAGONAL_BIT_MAP[bit] | RIGHT_DIAGONAL_BIT_MAP[bit];
+}
+
+export { getFileBitboard, getRankBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset, getRightDiagonalFromBit, getLeftDiagonalFromBit, getDiagonalsFromBit };

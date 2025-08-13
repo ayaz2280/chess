@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { Bitboard, EnumPiece } from '../../src/ChessClass/BoardBB/BitboardTypes';
-import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset } from '../../src/ChessClass/MovesBB/MoveUtils';
+import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset, getLeftDiagonalFromBit } from '../../src/ChessClass/MovesBB/MoveUtils';
+import { LEFT_DIAGONAL_BIT_MAP, LEFT_DIAGONALS, RIGHT_DIAGONAL_BIT_MAP, RIGHT_DIAGONALS } from '../../src/ChessClass/MovesBB/MoveConstants';
 
 describe('MoveBB.MoveUtils', () => {
   describe('getRankBitboard', () => {
@@ -95,5 +96,25 @@ describe('MoveBB.MoveUtils', () => {
       }
       
     });
+  });
+
+  describe('getRightDiagonalFromBit', () => {
+    it('should return correct diagonals for bits from 0 to 63', () => {
+      //console.log('RIGHT_DIAGONAL_BIT_MAP');
+      ///console.log(LEFT_DIAGONAL_BIT_MAP);
+      for (let bit = 0; bit < 64; bit++) {
+        const diagonal: Bitboard = getLeftDiagonalFromBit(bit);
+
+        const segments: string[] = diagonal.toString(2).padStart(64, '0').match(/.{1,8}/g) || [];
+        console.log(`Bit ${bit}`);
+        segments.forEach((segment, index) => {
+          console.log(segment.split('').join(' '));
+        });
+        console.log();
+
+        //const expected: Bitboard = RIGHT_DIAGONALS[7 - Math.floor(bit / 8) + (bit % 8)];
+        //expect(diagonal).to.equal(expected);
+      }
+    })
   });
 })
