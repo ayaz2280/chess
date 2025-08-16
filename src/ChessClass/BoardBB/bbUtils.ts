@@ -14,6 +14,14 @@ function getPosMask(bit: number): Bitboard {
   return 1n << ( 8n * (BigInt(bit) / 8n) - BigInt(bit) % 8n + 7n );
 }
 
+function getPosMaskShiftLeft(bit: number, shift: number): Bitboard {
+  return getPosMask(bit) >> BigInt(shift);
+}
+
+function getPosMaskShiftRight(bit: number, shift: number): Bitboard {
+  return getPosMask(bit) << BigInt(shift);
+}
+
 function getEnumPieceType(piece: string): EnumPiece {
   const p: string = piece.toLowerCase();
   switch (p) {
@@ -27,4 +35,4 @@ function getEnumPieceType(piece: string): EnumPiece {
   }
 }
 
-export { getMaskFromPos, getEnumPieceType, getPosMask };
+export { getMaskFromPos, getEnumPieceType, getPosMask, getPosMaskShiftLeft, getPosMaskShiftRight };

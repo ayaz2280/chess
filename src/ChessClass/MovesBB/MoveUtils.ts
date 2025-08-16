@@ -94,4 +94,8 @@ function getDiagonalsFromBit(bit: number): Bitboard {
   return LEFT_DIAGONAL_BIT_MAP[bit] | RIGHT_DIAGONAL_BIT_MAP[bit];
 }
 
-export { getFileBitboard, getRankBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset, getRightDiagonalFromBit, getLeftDiagonalFromBit, getDiagonalsFromBit };
+function getFileNum(bit: number): number {
+  return bit % 8;
+}
+
+export { getFileBitboard, getRankBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset, getRightDiagonalFromBit, getLeftDiagonalFromBit, getDiagonalsFromBit, getFileNum };

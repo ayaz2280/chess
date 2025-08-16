@@ -1,22 +1,37 @@
 import { getPosMask } from "../../BoardBB/bbUtils";
+import { emptyBitboard, filledBitboard } from "../../BoardBB/BitboardConstants";
 import { Bitboard } from "../../BoardBB/BitboardTypes";
+import { FILES_BITBOARDS } from "../MoveConstants";
 
 const KNIGHT_MOVE_MASKS: Bitboard[] = [];
 
-type FileRank = {
-  file: number,
-  rank: number,
-}
+function calculateKnightMoveMasks() {
+  const shifts: number[] = [6, 10, 15, 17, 6, 10, 15, 17];
+  const masksOut: Bitboard[] = [
+    ~(FILES_BITBOARDS[0] | FILES_BITBOARDS[1]),
+    ~(FILES_BITBOARDS[6] | FILES_BITBOARDS[7]),
+    ~FILES_BITBOARDS[0],
+    ~FILES_BITBOARDS[7],
+    ~(FILES_BITBOARDS[6] | FILES_BITBOARDS[7]),
+    ~(FILES_BITBOARDS[0] | FILES_BITBOARDS[1]),
+    ~FILES_BITBOARDS[7],
+    ~FILES_BITBOARDS[0],
+  ];
 
-const shifts: number[] = [6, 10, 15, 17, 6, 10, 15, 17];
-const fileRankShifts: number[][] = [[2,1], [-2,1], [1,2], [-1,2], [-2,-1], [2,-1], [-1,-2], [1,-2]];
+  for (let bit = 0; bit < 64; bit++) {
+    let endMasks: Bitboard = emptyBitboard;
+    
+    for (let i = 0; i < 8; i++) {
+      let endMask: Bitboard = getPosMask(bit) << BigInt(shifts[i % 4] * (i < 4 ? 1 : -1));
+      endMask &= masksOut[i];
+      endMask &= filledBitboard;
+      endMasks |= endMask;
+    }
 
-for (let bit = 0; bit < 64; bit++) {
-  const endMasks: Bitboard[] = [];
-  const expectedFileRanks: FileRank[] = [];
-  
-  for (let i = 0; i < 8; i++) {
-    const endMask: Bitboard = getPosMask(bit) << BigInt(shifts[i % 4] * (i < 4 ? 1 : -1));
-    endMasks.push(endMask);
+    KNIGHT_MOVE_MASKS.push(endMasks);
   }
 }
+
+calculateKnightMoveMasks();
+
+export { KNIGHT_MOVE_MASKS };
