@@ -2,11 +2,14 @@ import { expect } from 'chai';
 import { Bitboard, EnumPiece } from '../../src/ChessClass/BoardBB/BitboardTypes';
 import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset, getLeftDiagonalFromBit } from '../../src/ChessClass/MovesBB/MoveUtils';
 import { LEFT_DIAGONAL_BIT_MAP, LEFT_DIAGONALS, RIGHT_DIAGONAL_BIT_MAP, RIGHT_DIAGONALS } from '../../src/ChessClass/MovesBB/MoveConstants';
-import { KNIGHT_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasks/KnightMoveMasks';
-import { ROOK_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasks/RookMoveMasks';
-import { QUEEN_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasks/QueenMoveMasks';
-import { PAWN_ATTACK_MASKS, PAWN_PUSH_MASKS } from '../../src/ChessClass/MovesBB/MoveMasks/PawnMoveMasks';
+import { KNIGHT_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/KnightMoveMasks';
+import { ROOK_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/RookMoveMasks';
+import { QUEEN_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/QueenMoveMasks';
+import { PAWN_ATTACK_MASKS, PAWN_PUSH_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/PawnMoveMasks';
 import { displayBitboard } from '../../src/UI/Bitboard/BitboardDisplay';
+import { KING_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/KingMoveMasks'
+import { readMasks, writeMasks } from '../../src/ChessClass/MovesBB/MoveMasksFiles/MoveMasksFilesFunctions';
+import { read } from 'fs';
 
 describe('MoveBB.MoveUtils', () => {
   describe('getRankBitboard', () => {
@@ -103,17 +106,28 @@ describe('MoveBB.MoveUtils', () => {
     });
   });
 
-  describe('getRightDiagonalFromBit', () => {
-    it('should return correct diagonals for bits from 0 to 63', () => {
+  describe('savind and retrieving masks', () => {
+    it('should write masks correctly', () => {
+      const masks: Bitboard[] = KNIGHT_MOVE_MASKS;
+      const path: string = `C:/Users/Ayaz/Documents/GitHub/chess/src/ChessClass/MovesBB/MoveMasksFiles/KnightMasksFiles/knight_move_masks`;
 
-      for (let bit = 0; bit < 64; bit++) {
-        const moves: Bitboard = PAWN_ATTACK_MASKS[bit];
+      const masksBuff: Bitboard[] = [];
 
-        console.log(`Bit ${bit}`);
-        displayBitboard(moves);
-        console.log();
+      new Promise((resolve, reject) => {
+        writeMasks(path, masks);
+      })
+      
+        .then(() => {
+          readMasks(path, masksBuff);
+        })
+        .then(() => {
+          expect(masksBuff.length).to.equal(masks.length);
+          expect(masksBuff).to.deep.equal(masks);
+        })
+        .catch(err => {
+          console.error('Error during writing or reading masks:', err);
+        });
 
-      }
     })
   });
 })
