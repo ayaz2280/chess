@@ -1,7 +1,10 @@
+import path from "path";
 import { getPosMask } from "../../BoardBB/bbUtils";
 import { emptyBitboard, filledBitboard } from "../../BoardBB/BitboardConstants";
 import { Bitboard } from "../../BoardBB/BitboardTypes";
 import { FILES_BITBOARDS } from "../MoveConstants";
+import { loadMasks, MOVE_MASKS_BASE_DIR } from "../MoveMasksFiles/MasksInit";
+import { readMasks } from "../MoveMasksFiles/MoveMasksFilesFunctions";
 
 const KNIGHT_MOVE_MASKS: Bitboard[] = [];
 
@@ -32,6 +35,8 @@ function calculateKnightMoveMasks() {
   }
 }
 
-calculateKnightMoveMasks();
+const filePath: string = path.join(MOVE_MASKS_BASE_DIR, 'BishopMasksFiles', 'bishop_move_masks');
 
-export { KNIGHT_MOVE_MASKS };
+loadMasks(filePath, KNIGHT_MOVE_MASKS);
+
+export { KNIGHT_MOVE_MASKS, calculateKnightMoveMasks };

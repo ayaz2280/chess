@@ -4,6 +4,9 @@ import { Bitboard } from "../../BoardBB/BitboardTypes";
 import { getFileNum } from "../MoveUtils";
 import { displayBitboard } from "../../../UI/Bitboard/BitboardDisplay";
 import { FILES_BITBOARDS } from "../MoveConstants";
+import path from "path";
+import { loadMasks, MOVE_MASKS_BASE_DIR } from "../MoveMasksFiles/MasksInit";
+import { readMasks } from "../MoveMasksFiles/MoveMasksFilesFunctions";
 
 const PAWN_PUSH_MASKS: Bitboard[] = [];
 const PAWN_ATTACK_MASKS: Bitboard[] = [];
@@ -60,9 +63,15 @@ function calculatePawnAttackMasks(): void {
   }
 }
 
+const filePath: string = path.join(MOVE_MASKS_BASE_DIR, 'PawnMasksFiles');
+
+loadMasks(path.join(filePath, 'pawn_push_masks'), PAWN_PUSH_MASKS);
+loadMasks(path.join(filePath, 'pawn_attack_masks'), PAWN_ATTACK_MASKS);
+  
+//calculateBishopMoveMasks();
 
 
-calculatePawnPushMasks();
-calculatePawnAttackMasks();
+//calculatePawnPushMasks();
+//calculatePawnAttackMasks();
 
-export { PAWN_PUSH_MASKS, PAWN_ATTACK_MASKS, PAWN_EN_PASSANT_FILE_MASKS };
+export { PAWN_PUSH_MASKS, PAWN_ATTACK_MASKS, PAWN_EN_PASSANT_FILE_MASKS, calculatePawnAttackMasks, calculatePawnPushMasks };

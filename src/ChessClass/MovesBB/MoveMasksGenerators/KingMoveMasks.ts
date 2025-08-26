@@ -1,8 +1,11 @@
+import path from "path";
 import { displayBitboard } from "../../../UI/Bitboard/BitboardDisplay";
 import { getPosMask } from "../../BoardBB/bbUtils";
 import { filledBitboard } from "../../BoardBB/BitboardConstants";
 import { Bitboard } from "../../BoardBB/BitboardTypes";
 import { FILES_BITBOARDS } from "../MoveConstants";
+import { loadMasks, MOVE_MASKS_BASE_DIR } from "../MoveMasksFiles/MasksInit";
+import { readMasks } from "../MoveMasksFiles/MoveMasksFilesFunctions";
 import { getFileNum } from "../MoveUtils";
 
 
@@ -34,6 +37,8 @@ function calculateKingMoveMasks(): void {
   }
 }
 
-calculateKingMoveMasks();
+const filePath: string = path.join(MOVE_MASKS_BASE_DIR, 'BishopMasksFiles', 'bishop_move_masks');
 
-export { KING_MOVE_MASKS };
+loadMasks(filePath, KING_MOVE_MASKS);
+
+export { KING_MOVE_MASKS, calculateKingMoveMasks };

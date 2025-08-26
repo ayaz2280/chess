@@ -1,56 +1,33 @@
+import { assert } from "console";
 import { Bitboard } from "../../BoardBB/BitboardTypes";
-import fs from 'fs';
+import { promises } from 'fs';
+import { displayBitboard } from "../../../UI/Bitboard/BitboardDisplay";
+import path from 'path';
 
-async function writeMasks(path: string, masks: Bitboard[]) {
-  const masksArr: BigInt64Array = new BigInt64Array(masks);
 
-  const openPromise: Promise<number> = 
-    new Promise((resolve, reject) => {
-      fs.open(path, fs.constants.O_CREAT | fs.constants.O_WRONLY, (err, fd) => {
-      if (err) {
-        reject(`Error opening the file '${path}': ${err}`);
-      } else {
-        console.log(`File opened: ${fd}`);
-        resolve(fd);
-      }
-    });
-  });
+function writeMasks(pathString: string, masks: Bitboard[]): Promise<void> {
+  const masksArr: BigUint64Array = new BigUint64Array(masks);
 
-  openPromise
-    .then((fd) => {
-      fs.write(fd, masksArr, 0, masksArr.length, 0, (err, written, buffer) => {
-        if (err) {
-          throw new Error(`Error writing to file '${path}'`, err);
-        }
-
-        console.log(`Successfully written ${written} bytes to file ${path}`);
-        });
-      });
-
+  return promises.writeFile(pathString, masksArr) 
+  .then(() => {
+    console.log(`Successfully written ${masksArr.byteLength} bytes to file ${pathString}`);
+  })
 }
 
-async function readMasks(path: string, masksBuff: Bitboard[]) {
-  if (masksBuff.length !== 0) {
-    throw new Error(`masksBuff.length must equal to 0, got ${masksBuff.length}`);
-  }
+function readMasks(path: string): Promise<Bitboard[]> {
+  return promises.readFile(path)
+  .then(fileBuffer => {
+    const masksArr: BigUint64Array = new BigUint64Array(fileBuffer.buffer, fileBuffer.byteOffset, fileBuffer.length / 8);
+    const masks: Bitboard[] = Array.from(masksArr);
 
-  await fs.open(path, fs.constants.O_RDONLY, (err, fd) => {
-    if (err) {
-      return console.error(`Error opening the file '${path}'`, err);
+    if (masks.length !== 64) {
+      throw new RangeError(`Number of masks isn't equal 64. Got ${masks.length}`);
     }
-    console.log(`File opened: ${fd}`);
 
-    const masksArr: BigInt64Array = new BigInt64Array(masksBuff.length);
-
-    fs.read(fd, masksArr, 0, masksArr.length, 0, (err, bytesRead, buffer) => {
-      if (err) {
-        return console.error(`Error reading from file '${path}'`, err);
-      }
-
-      console.log(`Successfully read ${bytesRead} bytes from file ${path}`);
-      masksBuff.push(...Array.from(masksArr));
-    });
-  });
+    console.log(`Successfully read ${masksArr.length} bytes from file ${path}`);
+    
+    return masks;
+  })
 }
 
 export { writeMasks, readMasks };

@@ -3,6 +3,7 @@ import { Bitboard, EnumPiece } from '../../src/ChessClass/BoardBB/BitboardTypes'
 import { getRankBitboard, getFileBitboard, getRankBitboardWithOffset, getFileBitboardWithOffset, getLeftDiagonalFromBit } from '../../src/ChessClass/MovesBB/MoveUtils';
 import { LEFT_DIAGONAL_BIT_MAP, LEFT_DIAGONALS, RIGHT_DIAGONAL_BIT_MAP, RIGHT_DIAGONALS } from '../../src/ChessClass/MovesBB/MoveConstants';
 import { KNIGHT_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/KnightMoveMasks';
+import { BISHOP_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/BishopMoveMasks';
 import { ROOK_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/RookMoveMasks';
 import { QUEEN_MOVE_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/QueenMoveMasks';
 import { PAWN_ATTACK_MASKS, PAWN_PUSH_MASKS } from '../../src/ChessClass/MovesBB/MoveMasksGenerators/PawnMoveMasks';
@@ -106,28 +107,38 @@ describe('MoveBB.MoveUtils', () => {
     });
   });
 
-  describe('savind and retrieving masks', () => {
+  describe('saving and retrieving masks', () => {
     it('should write masks correctly', () => {
       const masks: Bitboard[] = KNIGHT_MOVE_MASKS;
-      const path: string = `C:/Users/Ayaz/Documents/GitHub/chess/src/ChessClass/MovesBB/MoveMasksFiles/KnightMasksFiles/knight_move_masks`;
+      const path: string = `C:/Users/ffajl/OneDrive/Документы/GitHub/untitled8/chess/src/ChessClass/MovesBB/MoveMasksFiles/KnightMasksFiles/knight_move_masks`;
 
-      const masksBuff: Bitboard[] = [];
-
-      new Promise((resolve, reject) => {
-        writeMasks(path, masks);
+      writeMasks(path, masks)
+      .then(() => {
+        console.log('i am here');
+        return readMasks(path);
       })
-      
-        .then(() => {
-          readMasks(path, masksBuff);
+      .then((masksBuff) => {
+        masksBuff.forEach((mask, bit) => {
+          //console.log(`bit #${bit}`);
+          //displayBitboard(mask);
         })
-        .then(() => {
-          expect(masksBuff.length).to.equal(masks.length);
-          expect(masksBuff).to.deep.equal(masks);
-        })
-        .catch(err => {
-          console.error('Error during writing or reading masks:', err);
-        });
+        expect(masksBuff.length).to.equal(masks.length);
+        expect(masksBuff).to.deep.equal(masks);
+      })
+      .catch(err => {
+        console.error('Error during writing or reading masks:', err);
+      });
+    })
 
+    it.only('masks should be initialized correctly on program start', () => {
+      const masksBuff: Bitboard[] = [...PAWN_ATTACK_MASKS];
+
+      masksBuff.forEach((mask, bit) => {
+        console.log(`bit #${bit}`);
+        displayBitboard(mask);
+      })
+      expect(masksBuff.length).to.equal(64);
+      
     })
   });
 })
